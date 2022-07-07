@@ -5,13 +5,14 @@
 //  Created by Olya Ganeva on 04.07.2022.
 //
 
+// TODO: Ограничить колличество вводимых цифр
+// TODO: Предусмотреть кейс, когда очень большое число умножается на очень большое число
+
 import UIKit
 import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -76,6 +77,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-
 }
-

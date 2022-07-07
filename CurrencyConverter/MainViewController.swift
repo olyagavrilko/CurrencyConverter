@@ -15,14 +15,25 @@ final class MainViewController: UIViewController {
         static let characterLimit = 10
         static let buttonWidth: CGFloat = (UIScreen.main.bounds.width - Consts.spacing * 5) / 4
     }
+    
+    private let viewModel: MainViewModel
 
-    let inputStackView = UIStackView()
-    let keyboardStackView = UIStackView()
+    private let inputStackView = UIStackView()
+    private let keyboardStackView = UIStackView()
     
     private let fromTextField = UITextField()
     private let toTextField = UITextField()
     private var fromLabel = UILabel()
     private var toLabel = UILabel()
+    
+    init(viewModel: MainViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,7 +78,7 @@ final class MainViewController: UIViewController {
         
         buttonsHorizontalStackView = createAndSetupHStackView(into: keyboardStackView)
         createAndSetupDoubleButton(into: buttonsHorizontalStackView, with: ButtonViewModel(title: "0", style: .dark))
-        createAndSetupButton(into: buttonsHorizontalStackView, with: ButtonViewModel(title: ",", style: .orange(fontSize: 40)))
+        createAndSetupButton(into: buttonsHorizontalStackView, with: ButtonViewModel(title: ",", style: .dark))
         createAndSetupButton(into: buttonsHorizontalStackView, with: ButtonViewModel(title: "􀆀", style: .orange(fontSize: 30)))
         
         view.addSubview(keyboardStackView)
@@ -149,7 +160,7 @@ final class MainViewController: UIViewController {
         }
         doubleButton.layer.cornerRadius = Consts.buttonWidth / 2
         doubleButton.backgroundColor = model.normalColor
-        doubleButton.addTarget(self, action: #selector(handler), for: .touchUpInside)
+        doubleButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         doubleButton.setTitle(model.title, for: .normal)
         doubleButton.setBackgroundImage(UIImage(color: model.highlightedColor), for: .highlighted)
         doubleButton.setBackgroundImage(UIImage(color: model.normalColor), for: .normal)
@@ -166,7 +177,7 @@ final class MainViewController: UIViewController {
         button.setTitle(model.title, for: .normal)
         button.setBackgroundImage(UIImage(color: model.highlightedColor), for: .highlighted)
         button.setBackgroundImage(UIImage(color: model.normalColor), for: .normal)
-        button.addTarget(self, action: #selector(handler), for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return button
     }
     
@@ -181,8 +192,14 @@ final class MainViewController: UIViewController {
         return hStackView
     }
     
-    @objc func handler(sender: UIButton) {
-//        let value = sender.title(for: .normal)!
-//        handle(value)
+    @objc private func buttonTapped(sender: UIButton) {
+        guard let value = sender.title(for: .normal) else {
+            return
+        }
+        viewModel.buttonTapped(with: value)
+    }
+    
+    func update(text: String) {
+        fromTextField.text = text
     }
 }
