@@ -59,6 +59,26 @@ import Foundation
 //    }
 //}
 
+//enum Input {
+//    case value(Double) // 5
+//    case comma(value: Int) // 5,
+//    case zeroes(value: Double, count: Int)
+//}
+
+//struct Input: Equatable {
+//    let value: Double
+//    let hasComma: Bool
+//    let zeroCount: Int
+//
+//    var stringValue: String {
+//        return ""
+//    }
+//
+//    func add(_ character: String) {
+//
+//    }
+//}
+
 final class MainViewModel {
     
     enum Operation: String {
@@ -70,17 +90,19 @@ final class MainViewModel {
     
     enum State: Equatable {
         case initial
-//        case inputComma(Double)
-        case firstInput(Double)
-        case operation(Double, Operation)
-        case secondInput(first: Double, second: Double, Operation)
-        case finish(Double, previousOperand: Double, previousOperation: Operation)
+        case firstInput(String)
+        case operation(String, Operation)
+        case secondInput(first: String, second: String, Operation)
+        case secondOperation(first: String, second: String, firstOperation: Operation, secondOperation: Operation)
+        case thirdInput(first: String, second: String, third: String, firstOperation: Operation, secondOperation: Operation)
+        case finish(String, previousOperand: String, previousOperation: Operation)
+        case error
     }
     
     enum Action {
-        case number(Double)
+        case number(String)
         case operation(Operation)
-//        case comma
+        case comma
         case equal
 //        case percent
         case cancel
@@ -99,73 +121,254 @@ final class MainViewModel {
         case .initial:
             return "0"
         case .firstInput(let value):
-            return value.stringValue
+            return spacingFormat(value)
         case .operation(let value, _):
-            return value.stringValue
+            return spacingFormat(value)
         case .secondInput(first: _, second: let second, _):
-            return second.stringValue
+            return spacingFormat(second)
+        case .secondOperation(first: let first, second: let second, firstOperation: let firstOperation, secondOperation: let secondOperation):
+            return spacingFormat(second)
+        case .thirdInput(first: let first, second: let second, third: let third, firstOperation: let firstOperation, secondOperation: let secondOperation):
+            return spacingFormat(third)
         case .finish(let value, _, _):
-            return value.stringValue
+            return spacingFormat(value)
+        case .error:
+            return "Ошибка"
         }
     }
     
     func reduce(state: State, action: Action) -> State {
         switch state {
+            
         case .initial:
             switch action {
             case .number(let value):
-                return State.firstInput(value)
-            case .operation, .equal, .cancel:
+                if value == "0" {
+                    return State.initial
+                } else {
+                    return State.firstInput(value)
+                }
+            case .operation(let operation):
+                return State.operation("0", operation)
+            case .comma:
+                return State.firstInput("0,")
+            case .equal, .cancel:
                 return State.initial
             }
+            
         case .firstInput(let number):
             switch action {
             case .number(let value):
-                let newNumber = number * 10 + value
-                return State.firstInput(Double(newNumber))
+// TODO: Ограничить количество вводимых цифр
+                let newNumber = number + value
+                return State.firstInput(newNumber)
             case .operation(let operation):
                 return State.operation(number, operation)
+            case .comma:
+                if number.contains(",") {
+                    return State.firstInput(number)
+                } else {
+                    return State.firstInput(number + ",")
+                }
             case .equal:
                 return State.firstInput(number)
             case .cancel:
                 return State.initial
             }
+            
         case .operation(let number, let operation):
             switch action {
             case .number(let value):
                 return State.secondInput(first: number, second: value, operation)
             case .operation(let operation):
                 return State.operation(number, operation)
+            case .comma:
+                return State.secondInput(first: number, second: "0,", operation)
             case .equal:
-                return State.operation(number, operation)
+                guard let numberDoubleValue = number.doubleValue else {
+                    return State.error
+                }
+                let newNumber = calculate(firstOperand: numberDoubleValue, secondOperand: numberDoubleValue, operation: operation)
+                return State.finish(newNumber.stringValue, previousOperand: number, previousOperation: operation)
             case .cancel:
                 return State.initial
             }
+            
         case .secondInput(let firstNumber, let secondNumber, let operation):
             switch action {
             case .number(let value):
-                let newNumber = secondNumber * 10 + value
+                let newNumber = secondNumber + value
                 return State.secondInput(first: firstNumber, second: newNumber, operation)
             case .operation(let newOperation):
-                let newNumber = calculate(firstOperand: firstNumber, secondOperand: secondNumber, operation: operation)
-                return State.operation(newNumber, newOperation)
+                guard let firstNumberDouble = firstNumber.doubleValue, let secondNumberDouble = secondNumber.doubleValue else {
+                    return State.error
+                }
+                
+                let newNumber = calculate(firstOperand: firstNumberDouble, secondOperand: secondNumberDouble, operation: operation)
+                
+                if secondNumber == "0" && operation == .divide {
+                    return .error
+                } else if (operation == .add || operation == .subtract) && (newOperation == .multiply || newOperation == .divide) {
+                    return .secondOperation(first: firstNumber, second: secondNumber, firstOperation: operation, secondOperation: newOperation)
+                } else {
+                    return State.operation(String(newNumber), newOperation)
+                }
+            case .comma:
+                return State.secondInput(first: firstNumber, second: secondNumber + ",", operation)
             case .equal:
-                let newNumber = calculate(firstOperand: firstNumber, secondOperand: secondNumber, operation: operation)
-                return State.finish(newNumber, previousOperand: secondNumber, previousOperation: operation)
+                guard let firstNumberDouble = firstNumber.doubleValue,
+                      let secondNumberDouble = secondNumber.doubleValue
+                else {
+                    return State.initial
+                }
+                
+                let newNumber = calculate(firstOperand: firstNumberDouble, secondOperand: secondNumberDouble, operation: operation)
+                
+                if secondNumber == "0" && operation == .divide {
+                    return .error
+                } else {
+                    return State.finish(newNumber.stringValue, previousOperand: secondNumber, previousOperation: operation)
+                }
             case .cancel:
                 return State.initial
             }
+            
+        case .secondOperation(first: let first, second: let second, firstOperation: let firstOperation, secondOperation: let secondOperation):
+            switch action {
+            case .number(let value):
+                return .thirdInput(first: first, second: second, third: value, firstOperation: firstOperation, secondOperation: secondOperation)
+            case .operation(let operation):
+                return .secondOperation(first: first, second: second, firstOperation: firstOperation, secondOperation: operation)
+            case .comma:
+                return .thirdInput(first: first, second: second, third: "0,", firstOperation: firstOperation, secondOperation: secondOperation)
+            case .equal:
+                guard let firstDouble = first.doubleValue, let secondDouble = second.doubleValue else {
+                    return .error
+                }
+                
+                if (firstOperation == .add || firstOperation == .subtract) && (secondOperation == .multiply || secondOperation == .divide) {
+                    
+                    let secondNumber = calculate(firstOperand: secondDouble, secondOperand: secondDouble, operation: secondOperation)
+                    
+                    let finishNumber = calculate(firstOperand: firstDouble, secondOperand: secondNumber, operation: firstOperation)
+                    
+                    return .finish(finishNumber.stringValue, previousOperand: second, previousOperation: secondOperation)
+                } else {
+                    let firstNumber = calculate(firstOperand: firstDouble, secondOperand: secondDouble, operation: firstOperation)
+                    
+                    let finishNumber = calculate(firstOperand: firstNumber, secondOperand: firstNumber, operation: secondOperation)
+                    
+                    return .finish(finishNumber.stringValue, previousOperand: firstNumber.stringValue, previousOperation: secondOperation)
+                }
+            case .cancel:
+                return .initial
+            }
+            
+        case .thirdInput(first: let first, second: let second, third: let third, firstOperation: let firstOperation, secondOperation: let secondOperation):
+            
+            guard let firstDouble = first.doubleValue,
+                  let secondDouble = second.doubleValue,
+                  let thirdDouble = third.doubleValue else {
+                return .error
+            }
+            
+            switch action {
+            case .number(let value):
+                let newNimber = third + value
+                return .thirdInput(
+                    first: first,
+                    second: second,
+                    third: newNimber,
+                    firstOperation: firstOperation,
+                    secondOperation: secondOperation)
+            case .operation(let operation):
+                if third == "0" && secondOperation == .divide {
+                    return .error
+                } else if operation == .subtract || operation == .add {
+                    
+                    if (firstOperation == .add || firstOperation == .subtract) && (secondOperation == .multiply || secondOperation == .divide) {
+                        
+                        let secondNumber = calculate(firstOperand: secondDouble, secondOperand: thirdDouble, operation: secondOperation)
+                        
+                        let finishNumber = calculate(firstOperand: firstDouble, secondOperand: secondNumber, operation: firstOperation)
+                        
+                        return .operation(finishNumber.stringValue, operation)
+                    } else {
+                        
+                        let firstNumber = calculate(firstOperand: firstDouble, secondOperand: secondDouble, operation: firstOperation)
+                        
+                        let finishNumber = calculate(firstOperand: firstNumber, secondOperand: thirdDouble, operation: secondOperation)
+                        
+                        return .operation(finishNumber.stringValue, operation)
+                    }
+                } else if operation == .multiply || operation == .divide {
+                    
+                    if (firstOperation == .add || firstOperation == .subtract) && (secondOperation == .multiply || secondOperation == .divide) {
+                        
+                        let secondNumber = calculate(firstOperand: secondDouble, secondOperand: thirdDouble, operation: secondOperation)
+                        
+                        return .secondOperation(first: first, second: secondNumber.stringValue, firstOperation: firstOperation, secondOperation: operation)
+                    } else {
+                        
+                        let firstNumber = calculate(firstOperand: firstDouble, secondOperand: secondDouble, operation: firstOperation)
+                        
+                        return .secondOperation(first: firstNumber.stringValue, second: second, firstOperation: secondOperation, secondOperation: operation)
+                    }
+                }
+            case .comma:
+                return .thirdInput(first: first, second: second, third: third + ",", firstOperation: firstOperation, secondOperation: secondOperation)
+            case .equal:
+                if third == "0" && secondOperation == .divide {
+                    return .error
+                } else if (firstOperation == .add || firstOperation == .subtract) && (secondOperation == .multiply || secondOperation == .divide) {
+                    let secondNumber = calculate(firstOperand: secondDouble, secondOperand: thirdDouble, operation: secondOperation)
+                    
+                    let finishNumber = calculate(firstOperand: firstDouble, secondOperand: secondNumber, operation: firstOperation)
+                    
+                    return .finish(finishNumber.stringValue, previousOperand: third, previousOperation: secondOperation)
+                } else {
+                    let firstNumber = calculate(firstOperand: firstDouble, secondOperand: secondDouble, operation: firstOperation)
+                    
+                    let finishNumber = calculate(firstOperand: firstNumber, secondOperand: thirdDouble, operation: secondOperation)
+                    
+                    return .finish(finishNumber.stringValue, previousOperand: third, previousOperation: secondOperation)
+                }
+            case .cancel:
+                return .initial
+            }
+            
         case .finish(let finishValue, previousOperand: let previousOperand, previousOperation: let previousOperation):
             switch action {
             case .number(let value):
                 return State.firstInput(value)
             case .operation(let operation):
                 return State.operation(finishValue, operation)
+            case .comma:
+                return .firstInput("0,")
             case .equal:
-                let newNumber = calculate(firstOperand: finishValue, secondOperand: previousOperand, operation: previousOperation)
-                return State.finish(newNumber, previousOperand: previousOperand, previousOperation: previousOperation)
+                guard let finishValueDouble = finishValue.doubleValue,
+                      let previousOperandDouble = previousOperand.doubleValue else {
+                    return .error
+                }
+                
+                let newNumber = calculate(firstOperand: finishValueDouble, secondOperand: previousOperandDouble, operation: previousOperation)
+                return .finish(newNumber.stringValue, previousOperand: previousOperand, previousOperation: previousOperation)
             case .cancel:
                 return State.initial
+            }
+    
+        case .error:
+            switch action {
+            case .number(let value):
+                return .firstInput(value)
+            case .operation(_):
+                return .error
+            case .comma:
+                return .firstInput("0,")
+            case .equal:
+                return .error
+            case .cancel:
+                return .initial
             }
         }
     }
@@ -177,10 +380,7 @@ final class MainViewModel {
     
     func makeAction(using value: String) -> Action {
         if "0123456789".contains(value) {
-            guard let number = Double(value) else {
-                return Action.cancel
-            }
-            return Action.number(number)
+            return Action.number(value)
         } else if "􀅿􀅾􀅼􀅽".contains(value) {
             if value == "􀅼" {
                 return Action.operation(.add)
@@ -191,6 +391,8 @@ final class MainViewModel {
             } else if value == "􀅿" {
                 return Action.operation(.divide)
             }
+        } else if value == "," {
+            return Action.comma
         } else if value == "􀆀" {
             return Action.equal
         } else if value == "C" {
@@ -200,6 +402,11 @@ final class MainViewModel {
     }
     
     func spacingFormat(_ unformatted: String) -> String {
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = " "
+        
         var toFormat = ""
         var formatted = ""
         
@@ -213,15 +420,16 @@ final class MainViewModel {
         } else {
             toFormat = unformatted
         }
-
-        toFormat.reversed().enumerated().forEach { item in
-            if item.offset % 3 == 0 && item.offset != 0 {
-                formatted = String(item.element) + " " + formatted
-            } else {
-                formatted = String(item.element) + formatted
-            }
+        
+        guard let doubleValue = Double(toFormat) else {
+            return ""
         }
-        return formatted
+        
+        let number = NSNumber(value: doubleValue)
+        
+        let s = String(formatter.string(from: number) ?? "")
+        formatted = s + formatted
+        return formatted.replacingOccurrences(of: ".", with: ",")
     }
     
     func calculate(firstOperand: Double, secondOperand: Double, operation: Operation) -> Double {

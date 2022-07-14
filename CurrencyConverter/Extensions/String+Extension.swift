@@ -15,4 +15,11 @@ extension String {
         }
         return doubleValue
     }
+    
+    var format: String {
+        if self.contains(".") {
+            return self.replacingOccurrences(of: ".", with: ",")
+        }
+        return self
+    }
 }
