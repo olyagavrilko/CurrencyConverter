@@ -8,18 +8,15 @@
 import Foundation
 
 extension String {
-    var doubleValue: Double? {
-        if self.isEmpty || self == "Ошибка"  { return 0 }
-        guard let doubleValue = Double(self.replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: " ", with: "")) else {
-            return 0
-        }
-        return doubleValue
+    
+    enum ConversionFailure: Error {
+        case double
     }
     
-    var format: String {
-        if self.contains(".") {
-            return self.replacingOccurrences(of: ".", with: ",")
+    func doubleValue() throws -> Double {
+        guard let doubleValue = Double(replacingOccurrences(of: ",", with: ".")) else {
+            throw ConversionFailure.double
         }
-        return self
+        return doubleValue
     }
 }
