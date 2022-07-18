@@ -116,26 +116,37 @@ final class MainViewModel {
     
     var currentState: State = .initial {
         didSet {
-            view?.update(text: makeText(using: currentState))
+            do {
+                view?.update(text: try makeText(using: currentState))
+            } catch {
+                view?.update(text: "Ошибка")
+            }
+//            view?.update(text: makeText(using: currentState))
         }
     }
     
-    func makeText(using state: State) -> String {
+    func makeText(using state: State) throws -> String {
         switch state {
         case .initial:
             return "0"
         case .firstInput(let value):
-            return spacingFormat(value)
+//            return spacingFormat(value)
+            return try Formatter.format(value)
         case .operation(let value, _):
-            return spacingFormat(value)
-        case .secondInput(first: _, second: let second, _):
-            return spacingFormat(second)
-        case .secondOperation(first: let first, second: let second, firstOperation: let firstOperation, secondOperation: let secondOperation):
-            return spacingFormat(second)
-        case .thirdInput(first: let first, second: let second, third: let third, firstOperation: let firstOperation, secondOperation: let secondOperation):
-            return spacingFormat(third)
+//            return spacingFormat(value)
+            return try Formatter.format(value)
+        case .secondInput(_, let second, _):
+//            return spacingFormat(second)
+            return try Formatter.format(second)
+        case .secondOperation(_, let second, _, _):
+//            return spacingFormat(second)
+            return try Formatter.format(second)
+        case .thirdInput(_, _, let third, _, _):
+//            return spacingFormat(third)
+            return try Formatter.format(third)
         case .finish(let value, _, _):
-            return spacingFormat(value)
+//            return spacingFormat(value)
+            return try Formatter.format(value)
         case .error:
             return "Ошибка"
         }
@@ -171,36 +182,5 @@ final class MainViewModel {
             return Action.cancel
         }
         return Action.cancel
-    }
-    
-    func spacingFormat(_ unformatted: String) -> String {
-        
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.groupingSeparator = " "
-        
-        var toFormat = ""
-        var formatted = ""
-        
-        if unformatted.contains(",") {
-            let components = unformatted.split(separator: ",").map { String($0) }
-            toFormat = components[0]
-            formatted = ","
-            if components.count > 1 {
-                formatted += components[1]
-            }
-        } else {
-            toFormat = unformatted
-        }
-        
-        guard let doubleValue = Double(toFormat) else {
-            return ""
-        }
-        
-        let number = NSNumber(value: doubleValue)
-        
-        let s = String(formatter.string(from: number) ?? "")
-        formatted = s + formatted
-        return formatted.replacingOccurrences(of: ".", with: ",")
     }
 }

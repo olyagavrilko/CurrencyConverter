@@ -9,14 +9,17 @@ import Foundation
 
 extension String {
     
-    enum ConversionFailure: Error {
-        case double
-    }
+    static let comma = ","
     
-    func doubleValue() throws -> Double {
-        guard let doubleValue = Double(replacingOccurrences(of: ",", with: ".")) else {
-            throw ConversionFailure.double
-        }
-        return doubleValue
-    }
+//    enum ConversionFailure: Error {
+//        case double
+//        case scientific
+//    }
+//    
+//    func doubleValue() throws -> Double {
+//        guard let doubleValue = Double(replacingOccurrences(of: ",", with: ".")) else {
+//            throw ConversionFailure.double
+//        }
+//        return doubleValue
+//    }
 }

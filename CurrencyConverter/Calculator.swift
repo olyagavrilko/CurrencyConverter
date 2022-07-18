@@ -11,21 +11,31 @@ enum Calculator {
     
     enum Failure: Error {
         case divideOnZero
+        case overflow
     }
     
     static func calculate(first: Double, second: Double, operation: Operation) throws -> Double {
+        
+        let result: Double
+        
         switch operation {
         case .add:
-            return first + second
+            result = first + second
         case .subtract:
-            return first - second
+            result = first - second
         case .multiply:
-            return first * second
+            result = first * second
         case .divide:
             guard second != .zero else {
                 throw Failure.divideOnZero
             }
-            return first / second
+            result = first / second
         }
+        
+        guard result.isFinite else {
+            throw Failure.overflow
+        }
+        
+        return result
     }
 }

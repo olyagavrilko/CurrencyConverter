@@ -8,7 +8,7 @@
 import XCTest
 @testable import CurrencyConverter
 
-// TODO: Протестировать число, которое не влезает в Double. Должна отображаться ""
+// TODO: Протестировать число, которое не влезает в Double. Должна отображаться "Ошибка"
 // TODO: Деление на ноль
 
 class ReduceTests: XCTestCase {
@@ -124,6 +124,11 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .secondInput(first: "1", second: "25", .add))
     }
     
+    func testSecondInputState11() throws {
+        let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "222333444", .add), action: .number("5"))
+        XCTAssertEqual(state, .secondInput(first: "1", second: "222333444", .add))
+    }
+    
     func testSecondInputState2() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .operation(.multiply))
         XCTAssertEqual(state, .secondOperation(first: "1", second: "2", firstOperation: .add, secondOperation: .multiply))
@@ -158,6 +163,11 @@ class ReduceTests: XCTestCase {
     
     func testSecondInputState7() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .comma)
+        XCTAssertEqual(state, .secondInput(first: "1", second: "2,", .add))
+    }
+    
+    func testSecondInputState12() throws {
+        let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2,", .add), action: .comma)
         XCTAssertEqual(state, .secondInput(first: "1", second: "2,", .add))
     }
     
@@ -291,6 +301,24 @@ class ReduceTests: XCTestCase {
             secondOperation: .multiply))
     }
     
+    func testThirdInputState9() throws {
+        let state = try StateMachine.reduce(
+            state: .thirdInput(
+                first: "2",
+                second: "3",
+                third: "111222333",
+                firstOperation: .add,
+                secondOperation: .multiply),
+            action: .number("4"))
+        
+        XCTAssertEqual(state, .thirdInput(
+            first: "2",
+            second: "3",
+            third: "111222333",
+            firstOperation: .add,
+            secondOperation: .multiply))
+    }
+    
     func testThirdInputState2() throws {
         let state = try StateMachine.reduce(
             state: .thirdInput(
@@ -345,6 +373,24 @@ class ReduceTests: XCTestCase {
                 first: "2",
                 second: "3",
                 third: "5",
+                firstOperation: .add,
+                secondOperation: .multiply),
+            action: .comma)
+        
+        XCTAssertEqual(state, .thirdInput(
+            first: "2",
+            second: "3",
+            third: "5,",
+            firstOperation: .add,
+            secondOperation: .multiply))
+    }
+    
+    func testThirdInputState10() throws {
+        let state = try StateMachine.reduce(
+            state: .thirdInput(
+                first: "2",
+                second: "3",
+                third: "5,",
                 firstOperation: .add,
                 secondOperation: .multiply),
             action: .comma)

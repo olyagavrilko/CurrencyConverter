@@ -13,6 +13,9 @@
 		198256872875BD420060BDE5 /* StateToTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198256862875BD420060BDE5 /* StateToTextTests.swift */; };
 		19A3B1DA28808A89008F0FE2 /* StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1D928808A89008F0FE2 /* StateMachine.swift */; };
 		19A3B1DC28809327008F0FE2 /* Calculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1DB28809327008F0FE2 /* Calculator.swift */; };
+		19A3B1DE2885597F008F0FE2 /* Validator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1DD2885597F008F0FE2 /* Validator.swift */; };
+		19A3B1E028858962008F0FE2 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1DF28858961008F0FE2 /* Formatter.swift */; };
+		19A3B1E22885960E008F0FE2 /* AppConsts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1E12885960E008F0FE2 /* AppConsts.swift */; };
 		19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26372872F3CD003E09C3 /* AppDelegate.swift */; };
 		19FD263A2872F3CD003E09C3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26392872F3CD003E09C3 /* SceneDelegate.swift */; };
 		19FD263C2872F3CD003E09C3 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD263B2872F3CD003E09C3 /* MainViewController.swift */; };
@@ -58,6 +61,9 @@
 		198256862875BD420060BDE5 /* StateToTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateToTextTests.swift; sourceTree = "<group>"; };
 		19A3B1D928808A89008F0FE2 /* StateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
 		19A3B1DB28809327008F0FE2 /* Calculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calculator.swift; sourceTree = "<group>"; };
+		19A3B1DD2885597F008F0FE2 /* Validator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validator.swift; sourceTree = "<group>"; };
+		19A3B1DF28858961008F0FE2 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
+		19A3B1E12885960E008F0FE2 /* AppConsts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConsts.swift; sourceTree = "<group>"; };
 		19FD26342872F3CD003E09C3 /* CurrencyConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19FD26372872F3CD003E09C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19FD26392872F3CD003E09C3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -152,6 +158,8 @@
 				19FD26402872F3CD003E09C3 /* CurrencyConverter.xcdatamodeld */,
 				19A3B1D928808A89008F0FE2 /* StateMachine.swift */,
 				19A3B1DB28809327008F0FE2 /* Calculator.swift */,
+				19A3B1DD2885597F008F0FE2 /* Validator.swift */,
+				19A3B1DF28858961008F0FE2 /* Formatter.swift */,
 			);
 			path = CurrencyConverter;
 			sourceTree = "<group>";
@@ -197,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				19FD26742873473B003E09C3 /* ButtonViewModel.swift */,
+				19A3B1E12885960E008F0FE2 /* AppConsts.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -467,14 +476,17 @@
 				19FD26752873473B003E09C3 /* ButtonViewModel.swift in Sources */,
 				198256812874DCD70060BDE5 /* Double+Extension.swift in Sources */,
 				19FD26802874B8FF003E09C3 /* MainAssembly.swift in Sources */,
+				19A3B1DE2885597F008F0FE2 /* Validator.swift in Sources */,
 				19FD263C2872F3CD003E09C3 /* MainViewController.swift in Sources */,
 				19A3B1DC28809327008F0FE2 /* Calculator.swift in Sources */,
 				19FD26422872F3CD003E09C3 /* CurrencyConverter.xcdatamodeld in Sources */,
 				19A3B1DA28808A89008F0FE2 /* StateMachine.swift in Sources */,
 				19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */,
+				19A3B1E028858962008F0FE2 /* Formatter.swift in Sources */,
 				19FD266C287337C1003E09C3 /* UIButton+Extension.swift in Sources */,
 				198256832874DCEB0060BDE5 /* String+Extension.swift in Sources */,
 				19FD263A2872F3CD003E09C3 /* SceneDelegate.swift in Sources */,
+				19A3B1E22885960E008F0FE2 /* AppConsts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

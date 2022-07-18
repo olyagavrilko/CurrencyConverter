@@ -13,7 +13,7 @@ final class StateToTextTests: XCTestCase {
     let viewModel = MainViewModel()
     
     func testInitialState() throws {
-        let text = viewModel.makeText(using: .initial)
+        let text = try viewModel.makeText(using: .initial)
         XCTAssertEqual(text, "0")
     }
     
