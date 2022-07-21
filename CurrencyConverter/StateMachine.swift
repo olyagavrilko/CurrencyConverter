@@ -10,8 +10,8 @@ import Foundation
 private extension String {
     static let zero = "0"
     static let zeroWithComma = "0,"
-//    static let comma = ","
 }
+
 // TODO: Ограничить ввод запятой, если уже введено 9 цифр (сделала в валидаторе)
 
 enum StateMachine {
@@ -28,7 +28,7 @@ enum StateMachine {
                 return .operation(.zero, operation)
             case .comma:
                 return .firstInput(.zeroWithComma)
-            case .equal, .cancel:
+            case .percent, .equal, .cancel:
                 return .initial
             }
             
@@ -36,12 +36,18 @@ enum StateMachine {
             switch action {
             case .number(let value):
                 let verifiedNumber = Validator.validateForInput(number: number, digit: value)
-                return .firstInput(verifiedNumber) // TODO: Ограничить количество вводимых цифр
+                return .firstInput(verifiedNumber)
             case .operation(let operation):
                 return .operation(number, operation)
             case .comma:
                 let verifiedNumber = Validator.validateForComma(number: number)
                 return .firstInput(verifiedNumber)
+            case .percent:
+                let result = try Calculator.calculate(
+                    first: Formatter.formatToDouble(number),
+                    second: 100,
+                    operation: .divide)
+                return .firstInput(try Formatter.formatToString(result))
             case .equal:
                 return .firstInput(number)
             case .cancel:
@@ -56,6 +62,22 @@ enum StateMachine {
                 return .operation(number, operation)
             case .comma:
                 return .secondInput(first: number, second: .zeroWithComma, operation)
+            case .percent:
+                if operation.isPrimary {
+                    let percent = try Calculator.calculate(
+                        first: Formatter.formatToDouble(number),
+                        second: 100,
+                        operation: .divide)
+                    return .secondInput(first: number, second: try Formatter.formatToString(percent), operation)
+                } else {
+                    let intermediateResultForPersent = try Calculator.calculate(first: Formatter.formatToDouble(number), second: Formatter.formatToDouble(number), operation: .multiply)
+                    
+                    let percent = try Calculator.calculate(
+                        first: intermediateResultForPersent,
+                        second: 100,
+                        operation: .divide)
+                    return .secondInput(first: number, second: try Formatter.formatToString(percent), operation)
+                }
             case .equal:
                 let result = try Calculator.calculate(
                     first: Formatter.formatToDouble(number),
@@ -72,11 +94,6 @@ enum StateMachine {
                 let verifiedNumber = Validator.validateForInput(number: second, digit: value)
                 return .secondInput(first: first, second: verifiedNumber, operation)
             case .operation(let secondOperation):
-                let result = try Calculator.calculate(
-                    first: Formatter.formatToDouble(first),
-                    second: Formatter.formatToDouble(second),
-                    operation: operation)
-                
                 if !operation.isPrimary && secondOperation.isPrimary {
                     return .secondOperation(
                         first: first,
@@ -84,11 +101,25 @@ enum StateMachine {
                         firstOperation: operation,
                         secondOperation: secondOperation)
                 } else {
+                    let result = try Calculator.calculate(
+                        first: Formatter.formatToDouble(first),
+                        second: Formatter.formatToDouble(second),
+                        operation: operation)
                     return .operation(try Formatter.formatToString(result), secondOperation)
                 }
             case .comma:
                 let verifiedNumber = Validator.validateForComma(number: second)
                 return .secondInput(first: first, second: verifiedNumber, operation)
+            case .percent:
+                let intermediateResultForPercent = try Calculator.calculate(
+                    first: Formatter.formatToDouble(first),
+                    second: Formatter.formatToDouble(second),
+                    operation: .multiply)
+                let percent = try Calculator.calculate(
+                    first: intermediateResultForPercent,
+                    second: 100,
+                    operation: .divide)
+                return .secondInput(first: first, second: try Formatter.formatToString(percent), operation)
             case .equal:
                 let result = try Calculator.calculate(
                     first: Formatter.formatToDouble(first),
@@ -122,36 +153,31 @@ enum StateMachine {
                     third: .zeroWithComma,
                     firstOperation: firstOperation,
                     secondOperation: secondOperation)
-            case .equal:
-                if !firstOperation.isPrimary && secondOperation.isPrimary {
-                    
-                    let intermediateResult = try Calculator.calculate(
+            case .percent:
+                    let intermediateResultForPercent = try Calculator.calculate(
                         first: Formatter.formatToDouble(second),
                         second: Formatter.formatToDouble(second),
-                        operation: secondOperation)
-                    
-                    let result = try Calculator.calculate(
-                        first: Formatter.formatToDouble(first),
-                        second: intermediateResult,
-                        operation: firstOperation)
-                    
-                    return .finish(try Formatter.formatToString(result), previousOperand: second, previousOperation: secondOperation)
-                } else {
-                    let intermediateResult = try Calculator.calculate(
-                        first: Formatter.formatToDouble(first),
-                        second: Formatter.formatToDouble(second),
-                        operation: firstOperation)
-                    
-                    let result = try Calculator.calculate(
-                        first: intermediateResult,
-                        second: intermediateResult,
-                        operation: secondOperation)
-                    
-                    return .finish(
-                        try Formatter.formatToString(result),
-                        previousOperand: try Formatter.formatToString(intermediateResult),
-                        previousOperation: secondOperation)
-                }
+                        operation: .multiply)
+                    let percent = try Calculator.calculate(
+                        first: intermediateResultForPercent,
+                        second: 100,
+                        operation: .divide)
+                    return .secondInput(
+                        first: first,
+                        second: try Formatter.formatToString(percent),
+                        firstOperation)
+            case .equal:
+                let intermediateResult = try Calculator.calculate(
+                    first: Formatter.formatToDouble(second),
+                    second: Formatter.formatToDouble(second),
+                    operation: secondOperation)
+                
+                let result = try Calculator.calculate(
+                    first: Formatter.formatToDouble(first),
+                    second: intermediateResult,
+                    operation: firstOperation)
+                
+                return .finish(try Formatter.formatToString(result), previousOperand: second, previousOperation: secondOperation)
             case .cancel:
                 return .initial
             }
@@ -192,7 +218,6 @@ enum StateMachine {
                     
                     return .operation(try Formatter.formatToString(finishNumber), thirdOperation)
                 }
-                
             case .comma:
                 let verifiedNumber = Validator.validateForComma(number: third)
                 return .thirdInput(
@@ -201,38 +226,33 @@ enum StateMachine {
                     third: verifiedNumber,
                     firstOperation: firstOperation,
                     secondOperation: secondOperation)
+            case .percent:
+                let intermediateResultForPercent = try Calculator.calculate(
+                    first: Formatter.formatToDouble(second),
+                    second: Formatter.formatToDouble(third),
+                    operation: secondOperation)
+                
+                let percent = try Calculator.calculate(
+                    first: intermediateResultForPercent,
+                    second: 100,
+                    operation: .divide)
+                
+                return .secondInput(first: first, second: try Formatter.formatToString(percent), firstOperation)
             case .equal:
-                if !firstOperation.isPrimary && secondOperation.isPrimary {
-                    let secondNumber = try Calculator.calculate(
-                        first: Formatter.formatToDouble(second),
-                        second: Formatter.formatToDouble(third),
-                        operation: secondOperation)
-                    
-                    let finishNumber = try Calculator.calculate(
-                        first: Formatter.formatToDouble(first),
-                        second: secondNumber,
-                        operation: firstOperation)
-                    
-                    return .finish(
-                        try Formatter.formatToString(finishNumber),
-                        previousOperand: third,
-                        previousOperation: secondOperation)
-                } else {
-                    let firstNumber = try Calculator.calculate(
-                        first: Formatter.formatToDouble(first),
-                        second: Formatter.formatToDouble(second),
-                        operation: firstOperation)
-                    
-                    let finishNumber = try Calculator.calculate(
-                        first: firstNumber,
-                        second: Formatter.formatToDouble(third),
-                        operation: secondOperation)
-                    
-                    return .finish(
-                        try Formatter.formatToString(finishNumber),
-                        previousOperand: third,
-                        previousOperation: secondOperation)
-                }
+                let intermediateResult = try Calculator.calculate(
+                    first: Formatter.formatToDouble(second),
+                    second: Formatter.formatToDouble(third),
+                    operation: secondOperation)
+                
+                let result = try Calculator.calculate(
+                    first: Formatter.formatToDouble(first),
+                    second: intermediateResult,
+                    operation: firstOperation)
+                
+                return .finish(
+                    try Formatter.formatToString(result),
+                    previousOperand: third,
+                    previousOperation: secondOperation)
             case .cancel:
                 return .initial
             }
@@ -240,11 +260,17 @@ enum StateMachine {
         case let .finish(finishValue, previousOperand, previousOperation):
             switch action {
             case .number(let value):
-                return State.firstInput(value)
+                return .firstInput(value)
             case .operation(let operation):
-                return State.operation(finishValue, operation)
+                return .operation(finishValue, operation)
             case .comma:
                 return .firstInput(.zeroWithComma)
+            case .percent:
+                let percent = try Calculator.calculate(
+                    first: Formatter.formatToDouble(finishValue),
+                    second: 100,
+                    operation: .divide)
+                return .firstInput(try Formatter.formatToString(percent))
             case .equal:
                 let newNumber = try Calculator.calculate(
                     first: Formatter.formatToDouble(finishValue),
@@ -262,10 +288,12 @@ enum StateMachine {
             switch action {
             case .number(let value):
                 return .firstInput(value)
-            case .operation(_):
+            case .operation:
                 return .error
             case .comma:
                 return .firstInput(.zeroWithComma)
+            case .percent:
+                return .error
             case .equal:
                 return .error
             case .cancel:

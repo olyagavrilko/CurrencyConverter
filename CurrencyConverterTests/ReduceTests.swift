@@ -35,6 +35,11 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .firstInput("0,"))
     }
     
+    func testInitialState7() throws {
+        let state = try StateMachine.reduce(state: .initial, action: .percent)
+        XCTAssertEqual(state, .initial)
+    }
+    
     func testInitialState5() throws {
         let state = try StateMachine.reduce(state: .initial, action: .equal)
         XCTAssertEqual(state, .initial)
@@ -52,7 +57,6 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .firstInput("12"))
     }
     
-    // TODO: Повторить на 2 и 3 Input (сделала)
     func testFirstInputState2() throws {
         let state = try StateMachine.reduce(state: .firstInput("100,111555"), action: .number("2"))
         XCTAssertEqual(state, .firstInput("100,111555"))
@@ -73,6 +77,11 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .firstInput("1,5"))
     }
     
+    func testFirstInputState8() throws {
+        let state = try StateMachine.reduce(state: .firstInput("5"), action: .percent)
+        XCTAssertEqual(state, .firstInput("0,05"))
+    }
+    
     func testFirstInputState6() throws {
         let state = try StateMachine.reduce(state: .firstInput("1"), action: .equal)
         XCTAssertEqual(state, .firstInput("1"))
@@ -90,11 +99,6 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .secondInput(first: "2", second: "3", .multiply))
     }
     
-    func testOperationState2() throws {
-        let state = try StateMachine.reduce(state: .operation("2,", .multiply), action: .number("3"))
-        XCTAssertEqual(state, .secondInput(first: "2,", second: "3", .multiply))
-    }
-    
     func testOperationState3() throws {
         let state = try StateMachine.reduce(state: .operation("2", .multiply), action: .operation(.add))
         XCTAssertEqual(state, .operation("2", .add))
@@ -103,6 +107,16 @@ class ReduceTests: XCTestCase {
     func testOperationState4() throws {
         let state = try StateMachine.reduce(state: .operation("2", .multiply), action: .comma)
         XCTAssertEqual(state, .secondInput(first: "2", second: "0,", .multiply))
+    }
+    
+    func testOperationState7() throws {
+        let state = try StateMachine.reduce(state: .operation("5", .multiply), action: .percent)
+        XCTAssertEqual(state, .secondInput(first: "5", second: "0,05", .multiply))
+    }
+    
+    func testOperationState8() throws {
+        let state = try StateMachine.reduce(state: .operation("5", .add), action: .percent)
+        XCTAssertEqual(state, .secondInput(first: "5", second: "0,25", .add))
     }
     
     func testOperationState5() throws {
@@ -115,18 +129,11 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .initial)
     }
     
-    
-    
 // MARK: - SecondInputState
     
     func testSecondInputState1() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .number("5"))
         XCTAssertEqual(state, .secondInput(first: "1", second: "25", .add))
-    }
-    
-    func testSecondInputState11() throws {
-        let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "222333444", .add), action: .number("5"))
-        XCTAssertEqual(state, .secondInput(first: "1", second: "222333444", .add))
     }
     
     func testSecondInputState13() throws {
@@ -154,17 +161,20 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .operation("5", .add))
     }
     
-    func testSecondInputState6() throws {
-        XCTAssertThrowsError(
-            try StateMachine.reduce(
-                state: .secondInput(first: "1", second: "0", .divide),
-                action: .operation(.multiply))) { error in
-                    guard let error = error as? Calculator.Failure else {
-                        return XCTAssert(false)
-                    }
-                    XCTAssertEqual(error, .divideOnZero)
-                }
-    }
+    // TODO: .multiply .multiply
+    
+    // TODO: Перенести в тест функции calculate
+//    func testSecondInputState6() throws {
+//        XCTAssertThrowsError(
+//            try StateMachine.reduce(
+//                state: .secondInput(first: "1", second: "0", .divide),
+//                action: .operation(.multiply))) { error in
+//                    guard let error = error as? Calculator.Failure else {
+//                        return XCTAssert(false)
+//                    }
+//                    XCTAssertEqual(error, .divideOnZero)
+//                }
+//    }
     
     func testSecondInputState7() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .comma)
@@ -176,21 +186,14 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .secondInput(first: "1", second: "2,", .add))
     }
     
+    func testSecondInputState14() throws {
+        let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2,", .add), action: .percent)
+        XCTAssertEqual(state, .secondInput(first: "1", second: "0,02", .add))
+    }
+    
     func testSecondInputState8() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .equal)
         XCTAssertEqual(state, .finish("3", previousOperand: "2", previousOperation: .add))
-    }
-    
-    func testSecondInputState9() {
-        XCTAssertThrowsError(
-            try StateMachine.reduce(
-                state: .secondInput(first: "1", second: "0", .divide),
-                action: .equal)) { error in
-                    guard let error = error as? Calculator.Failure else {
-                        return XCTAssert(false)
-                    }
-                    XCTAssertEqual(error, .divideOnZero)
-                }
     }
     
     func testSecondInputState10() throws {
@@ -250,6 +253,17 @@ class ReduceTests: XCTestCase {
             secondOperation: .multiply))
     }
     
+    func testSecondOperationState7() throws {
+        let state = try StateMachine.reduce(
+            state: .secondOperation(
+                first: "3",
+                second: "2",
+                firstOperation: .add,
+                secondOperation: .multiply),
+            action: .percent)
+        XCTAssertEqual(state, .secondInput(first: "3", second: "0,04", .add))
+    }
+    
     func testSecondOperationState4() throws {
         let state = try StateMachine.reduce(
             state: .secondOperation(
@@ -260,18 +274,6 @@ class ReduceTests: XCTestCase {
             action: .equal)
         
         XCTAssertEqual(state, .finish("7", previousOperand: "2", previousOperation: .multiply))
-    }
-    
-    func testSecondOperationState5() throws {
-        let state = try StateMachine.reduce(
-            state: .secondOperation(
-                first: "3",
-                second: "2",
-                firstOperation: .multiply,
-                secondOperation: .add),
-            action: .equal)
-        
-        XCTAssertEqual(state, .finish("12", previousOperand: "6", previousOperation: .add))
     }
     
     func testSecondOperationState6() throws {
@@ -302,24 +304,6 @@ class ReduceTests: XCTestCase {
             first: "2",
             second: "3",
             third: "13",
-            firstOperation: .add,
-            secondOperation: .multiply))
-    }
-    
-    func testThirdInputState9() throws {
-        let state = try StateMachine.reduce(
-            state: .thirdInput(
-                first: "2",
-                second: "3",
-                third: "111222333",
-                firstOperation: .add,
-                secondOperation: .multiply),
-            action: .number("4"))
-        
-        XCTAssertEqual(state, .thirdInput(
-            first: "2",
-            second: "3",
-            third: "111222333",
             firstOperation: .add,
             secondOperation: .multiply))
     }
@@ -372,24 +356,6 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .operation("17", .subtract))
     }
     
-    func testThirdInputState4() throws {
-        XCTAssertThrowsError(
-            try StateMachine.reduce(
-                state: .thirdInput(
-                    first: "2",
-                    second: "3",
-                    third: "0",
-                    firstOperation: .add,
-                    secondOperation: .divide),
-                action: .operation(.subtract))
-        ) { error in
-            guard let error = error as? Calculator.Failure else {
-                return XCTAssert(false)
-            }
-            XCTAssertEqual(error, .divideOnZero)
-        }
-    }
-    
     func testThirdInputState5() throws {
         let state = try StateMachine.reduce(
             state: .thirdInput(
@@ -426,6 +392,18 @@ class ReduceTests: XCTestCase {
             secondOperation: .multiply))
     }
     
+    func testThirdInputState12() throws {
+        let state = try StateMachine.reduce(
+            state: .thirdInput(
+                first: "3",
+                second: "2",
+                third: "4",
+                firstOperation: .add,
+                secondOperation: .multiply),
+            action: .percent)
+        XCTAssertEqual(state, .secondInput(first: "3", second: "0,08", .add))
+    }
+    
     func testThirdInputState6() throws {
         let state = try StateMachine.reduce(
             state: .thirdInput(
@@ -437,24 +415,6 @@ class ReduceTests: XCTestCase {
             action: .equal)
         
         XCTAssertEqual(state, .finish("17", previousOperand: "5", previousOperation: .multiply))
-    }
-    
-    func testThirdInputState7() throws {
-        XCTAssertThrowsError(
-            try StateMachine.reduce(
-                state: .thirdInput(
-                    first: "2",
-                    second: "3",
-                    third: "0",
-                    firstOperation: .add,
-                    secondOperation: .divide),
-                action: .equal)
-        ) { error in
-            guard let error = error as? Calculator.Failure else {
-                return XCTAssert(false)
-            }
-            XCTAssertEqual(error, .divideOnZero)
-        }
     }
     
     func testThirdInputState8() throws {
@@ -496,6 +456,13 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .firstInput("0,"))
     }
     
+    func testFinishState6() throws {
+        let state = try StateMachine.reduce(
+            state: .finish("5", previousOperand: "2", previousOperation: .add),
+            action: .percent)
+        XCTAssertEqual(state, .finish("0,05", previousOperand: "2", previousOperation: .add))
+    }
+    
     func testFinishState4() throws {
         let state = try StateMachine.reduce(
             state: .finish("5", previousOperand: "2", previousOperation: .add),
@@ -514,52 +481,33 @@ class ReduceTests: XCTestCase {
     
 // MARK: - ErrorState
     
-     // TODO: Работает не так, как на телефоне
     func testErrorState1() throws {
         let state = try StateMachine.reduce(state: .error, action: .number("5"))
-        
         XCTAssertEqual(state, .firstInput("5"))
     }
     
     func testErrorState2() throws {
         let state = try StateMachine.reduce(state: .error, action: .operation(.add))
-        
         XCTAssertEqual(state, .error)
     }
     
     func testErrorState3() throws {
         let state = try StateMachine.reduce(state: .error, action: .comma)
-        
         XCTAssertEqual(state, .firstInput("0,"))
+    }
+    
+    func testErrorState6() throws {
+        let state = try StateMachine.reduce(state: .error, action: .percent)
+        XCTAssertEqual(state, .error)
     }
     
     func testErrorState4() throws {
         let state = try StateMachine.reduce(state: .error, action: .equal)
-        
         XCTAssertEqual(state, .error)
     }
     
     func testErrorState5() throws {
         let state = try StateMachine.reduce(state: .error, action: .cancel)
-        
         XCTAssertEqual(state, .initial)
     }
 }
-
-//enum State: Equatable {
-//    case initial
-//    case inputComma(String)
-//    case firstInput(String)
-//    case operation(String, Operation)
-//    case secondInput(first: String, second: String, Operation)
-//    case finish(String, previousOperand: String, previousOperation: Operation)
-//}
-//
-//enum Action {
-//    case number(String)
-//    case operation(Operation)
-//    case comma
-//    case equal
-////        case percent
-//    case cancel
-//}

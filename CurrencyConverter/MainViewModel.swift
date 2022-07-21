@@ -105,8 +105,8 @@ enum Action {
     case number(String)
     case operation(Operation)
     case comma
+    case percent
     case equal
-//        case percent
     case cancel
 }
 
