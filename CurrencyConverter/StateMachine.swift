@@ -12,8 +12,8 @@ private extension String {
     static let zeroWithComma = "0,"
 //    static let comma = ","
 }
-// TODO: Ограничить ввод запятой, если уже введено 9 цифр
-// TODO: При делении научного числа, проверять можно ли уже отображать в десятичном виде (999999999*9/5/5/5)
+// TODO: Ограничить ввод запятой, если уже введено 9 цифр (сделала в валидаторе)
+
 enum StateMachine {
     
     static func reduce(state: State, action: Action) throws -> State {
@@ -58,11 +58,10 @@ enum StateMachine {
                 return .secondInput(first: number, second: .zeroWithComma, operation)
             case .equal:
                 let result = try Calculator.calculate(
-//                    first: try number.doubleValue(),
                     first: Formatter.formatToDouble(number),
                     second: Formatter.formatToDouble(number),
                     operation: operation)
-                return .finish(result.stringValue, previousOperand: number, previousOperation: operation)
+                return .finish(try Formatter.formatToString(result), previousOperand: number, previousOperation: operation)
             case .cancel:
                 return .initial
             }
@@ -85,7 +84,7 @@ enum StateMachine {
                         firstOperation: operation,
                         secondOperation: secondOperation)
                 } else {
-                    return .operation(result.stringValue, secondOperation)
+                    return .operation(try Formatter.formatToString(result), secondOperation)
                 }
             case .comma:
                 let verifiedNumber = Validator.validateForComma(number: second)
@@ -96,7 +95,7 @@ enum StateMachine {
                     second: Formatter.formatToDouble(second),
                     operation: operation)
                 
-                return .finish(result.stringValue, previousOperand: second, previousOperation: operation)
+                return .finish(try Formatter.formatToString(result), previousOperand: second, previousOperation: operation)
             case .cancel:
                 return .initial
             }
@@ -136,7 +135,7 @@ enum StateMachine {
                         second: intermediateResult,
                         operation: firstOperation)
                     
-                    return .finish(result.stringValue, previousOperand: second, previousOperation: secondOperation)
+                    return .finish(try Formatter.formatToString(result), previousOperand: second, previousOperation: secondOperation)
                 } else {
                     let intermediateResult = try Calculator.calculate(
                         first: Formatter.formatToDouble(first),
@@ -149,8 +148,8 @@ enum StateMachine {
                         operation: secondOperation)
                     
                     return .finish(
-                        result.stringValue,
-                        previousOperand: intermediateResult.stringValue,
+                        try Formatter.formatToString(result),
+                        previousOperand: try Formatter.formatToString(intermediateResult),
                         previousOperation: secondOperation)
                 }
             case .cancel:
@@ -177,7 +176,7 @@ enum StateMachine {
                     
                     return .secondOperation(
                         first: first,
-                        second: secondNumber.stringValue,
+                        second: try Formatter.formatToString(secondNumber),
                         firstOperation: firstOperation,
                         secondOperation: thirdOperation)
                 } else {
@@ -191,7 +190,7 @@ enum StateMachine {
                         second: secondNumber,
                         operation: firstOperation)
                     
-                    return .operation(finishNumber.stringValue, thirdOperation)
+                    return .operation(try Formatter.formatToString(finishNumber), thirdOperation)
                 }
                 
             case .comma:
@@ -215,7 +214,7 @@ enum StateMachine {
                         operation: firstOperation)
                     
                     return .finish(
-                        finishNumber.stringValue,
+                        try Formatter.formatToString(finishNumber),
                         previousOperand: third,
                         previousOperation: secondOperation)
                 } else {
@@ -230,7 +229,7 @@ enum StateMachine {
                         operation: secondOperation)
                     
                     return .finish(
-                        finishNumber.stringValue,
+                        try Formatter.formatToString(finishNumber),
                         previousOperand: third,
                         previousOperation: secondOperation)
                 }
@@ -252,7 +251,7 @@ enum StateMachine {
                     second: Formatter.formatToDouble(previousOperand),
                     operation: previousOperation)
                 return .finish(
-                    newNumber.stringValue,
+                    try Formatter.formatToString(newNumber),
                     previousOperand: previousOperand,
                     previousOperation: previousOperation)
             case .cancel:

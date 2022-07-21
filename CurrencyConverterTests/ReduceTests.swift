@@ -8,8 +8,8 @@
 import XCTest
 @testable import CurrencyConverter
 
-// TODO: Протестировать число, которое не влезает в Double. Должна отображаться "Ошибка"
-// TODO: Деление на ноль
+// TODO: Протестировать число, которое не влезает в Double. Должна отображаться "Ошибка" (сделала)
+// TODO: Деление на ноль (сделала)
 
 class ReduceTests: XCTestCase {
     
@@ -52,10 +52,10 @@ class ReduceTests: XCTestCase {
         XCTAssertEqual(state, .firstInput("12"))
     }
     
-    // TODO: Повторить на 2 и 3 Input
+    // TODO: Повторить на 2 и 3 Input (сделала)
     func testFirstInputState2() throws {
-        let state = try StateMachine.reduce(state: .firstInput("100,000005"), action: .number("2"))
-        XCTAssertEqual(state, .firstInput("100,000005"))
+        let state = try StateMachine.reduce(state: .firstInput("100,111555"), action: .number("2"))
+        XCTAssertEqual(state, .firstInput("100,111555"))
     }
     
     func testFirstInputState3() throws {
@@ -127,6 +127,11 @@ class ReduceTests: XCTestCase {
     func testSecondInputState11() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "222333444", .add), action: .number("5"))
         XCTAssertEqual(state, .secondInput(first: "1", second: "222333444", .add))
+    }
+    
+    func testSecondInputState13() throws {
+        let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "222,333444", .add), action: .number("5"))
+        XCTAssertEqual(state, .secondInput(first: "1", second: "222,333444", .add))
     }
     
     func testSecondInputState2() throws {
@@ -315,6 +320,24 @@ class ReduceTests: XCTestCase {
             first: "2",
             second: "3",
             third: "111222333",
+            firstOperation: .add,
+            secondOperation: .multiply))
+    }
+    
+    func testThirdInputState11() throws {
+        let state = try StateMachine.reduce(
+            state: .thirdInput(
+                first: "2",
+                second: "3",
+                third: "111,222333",
+                firstOperation: .add,
+                secondOperation: .multiply),
+            action: .number("4"))
+        
+        XCTAssertEqual(state, .thirdInput(
+            first: "2",
+            second: "3",
+            third: "111,222333",
             firstOperation: .add,
             secondOperation: .multiply))
     }

@@ -19,6 +19,6 @@ enum Validator {
     }
     
     static func validateForComma(number: String) -> String {
-        return number.contains(String.comma) ? number : number + .comma
+        return number.contains(String.comma) || number.count == 9 ? number : number + .comma
     }
 }

@@ -8,6 +8,8 @@
 import XCTest
 @testable import CurrencyConverter
 
+
+
 final class StateToTextTests: XCTestCase {
     
     let viewModel = MainViewModel()

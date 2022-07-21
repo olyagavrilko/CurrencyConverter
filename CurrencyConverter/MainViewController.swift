@@ -40,6 +40,10 @@ final class MainViewController: UIViewController {
         setupViews()
     }
     
+    func update(text: String) {
+        fromTextField.text = text
+    }
+    
 //    MARK: - Private
     
     private func setupViews() {
@@ -197,9 +201,5 @@ final class MainViewController: UIViewController {
             return
         }
         viewModel.buttonTapped(with: value)
-    }
-    
-    func update(text: String) {
-        fromTextField.text = text
     }
 }
