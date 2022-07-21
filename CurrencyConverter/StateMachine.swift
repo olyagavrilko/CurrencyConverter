@@ -12,8 +12,6 @@ private extension String {
     static let zeroWithComma = "0,"
 }
 
-// TODO: Ограничить ввод запятой, если уже введено 9 цифр (сделала в валидаторе)
-
 enum StateMachine {
     
     static func reduce(state: State, action: Action) throws -> State {
@@ -270,7 +268,10 @@ enum StateMachine {
                     first: Formatter.formatToDouble(finishValue),
                     second: 100,
                     operation: .divide)
-                return .firstInput(try Formatter.formatToString(percent))
+                return .finish(
+                    try Formatter.formatToString(percent),
+                    previousOperand: previousOperand,
+                    previousOperation: previousOperation)
             case .equal:
                 let newNumber = try Calculator.calculate(
                     first: Formatter.formatToDouble(finishValue),

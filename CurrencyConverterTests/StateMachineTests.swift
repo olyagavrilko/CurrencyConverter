@@ -1,5 +1,5 @@
 //
-//  ReduceTests.swift
+//  StateMachineTests.swift
 //  CurrencyConverterTests
 //
 //  Created by Olya Ganeva on 04.07.2022.
@@ -8,10 +8,7 @@
 import XCTest
 @testable import CurrencyConverter
 
-// TODO: Протестировать число, которое не влезает в Double. Должна отображаться "Ошибка" (сделала)
-// TODO: Деление на ноль (сделала)
-
-class ReduceTests: XCTestCase {
+class StateMachineTests: XCTestCase {
     
 // MARK: - InitialState
 
