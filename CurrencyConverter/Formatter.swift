@@ -7,6 +7,8 @@
 
 import Foundation
 
+// TODO: На втором вводе не вводится сотая часть числа
+
 enum Formatter {
     
     enum ConversionFailure: Error {
@@ -37,21 +39,9 @@ enum Formatter {
     
     static func format(_ unformatted: String) throws -> String {
         
-//        var integerDigits: String = "1234567890"
-//        let isFractional: Bool
-        
-//        if unformatted.contains(String.comma) {
-//            let components = unformatted.split(separator: Character(.comma)).map { String($0) }
-//            let integerDigits = components[0]
-//
-//        }
-        
-        
         if unformatted.contains(String.comma) && unformatted.count > AppConsts.maxInputCharacterCount + 1 {
             let components = unformatted.split(separator: Character(.comma)).map { String($0) }
             let integerDigits = components[0]
-//            let fractionDigits = components[1]
-//            let maxFractionDigits = 9 - integerDigits.count
             
             if integerDigits.count < 9 {
                 return try formatToDecimalStyle(unformatted)
@@ -73,19 +63,7 @@ enum Formatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = " "
-//        formatter.usesSignificantDigits = true
-//        formatter.maximumSignificantDigits = 4
         formatter.maximumFractionDigits = 2
-        
-//        var toFormat = unformatted
-        
-//        if unformatted.contains(String.comma) {
-//            toFormat = unformatted.replacingOccurrences(of: String.comma, with: ".")
-//        }
-        
-//        guard let doubleValue = try Formatter.formatToDouble(unformatted) else {
-//            throw ConversionFailure.decimal
-//        }
         
         let number = NSNumber(value: try Formatter.formatToDouble(unformatted))
         
