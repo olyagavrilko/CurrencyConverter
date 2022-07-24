@@ -8,5 +8,6 @@
 import Foundation
 
 enum AppConsts {
-    static let maxInputCharacterCount = 9
+    static let maxDigitCount = 9
+    static let maxFractionDigitCount = 2
 }

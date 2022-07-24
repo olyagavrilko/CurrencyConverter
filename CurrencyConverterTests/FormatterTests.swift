@@ -10,6 +10,35 @@ import XCTest
 
 class FormatterTests: XCTestCase {
     
+    // MARK: - formattedOutput
+    
+    func testFormat1() throws {
+        let result = try Formatter.formattedOutput("1234,")
+        XCTAssertEqual(result, "1 234,")
+    }
+    
+    func testFormat2() throws {
+        let result = try Formatter.formattedOutput("1234,50")
+        XCTAssertEqual(result, "1 234,50")
+    }
+    
+    func testFormat4() throws {
+        let result = try Formatter.formattedOutput("1222333,45")
+        XCTAssertEqual(result, "1 222 333,45")
+    }
+    
+    func testFormat6() throws {
+        let result = try Formatter.formattedOutput("11222333,45")
+        XCTAssertEqual(result, "1,12223e7")
+    }
+    
+    func testFormat7() throws {
+        let result = try Formatter.formattedOutput("11222333,4")
+        XCTAssertEqual(result, "11 222 333,4")
+    }
+    
+    // MARK: - formatToDouble
+    
     func testFormatToDouble1() throws {
         let result = try Formatter.formatToDouble("555,5")
         XCTAssertEqual(result, 555.5)
@@ -25,6 +54,8 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(result, 555)
     }
     
+    // MARK: - formatToString
+    
     func testFormatToString1() throws {
         let result = try Formatter.formatToString(5)
         XCTAssertEqual(result, "5")
@@ -35,28 +66,47 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(result, "100,56")
     }
     
-    func testFormat1() throws {
-        let result = try Formatter.format("111222333,567")
-        XCTAssertEqual(result, "1,11222e8")
+    func testFormatToString3() throws {
+        let result = try Formatter.formatToString(100.567)
+        XCTAssertEqual(result, "100,57")
     }
     
-    func testFormat2() throws {
-        let result = try Formatter.format("1112223,567")
-        XCTAssertEqual(result, "1 112 223,57")
+    // MARK: - formatToDecimalStyle
+    
+    func testFormatToDecimalStyle1() throws {
+        let result = try Formatter.formatToDecimalStyle("1234")
+        XCTAssertEqual(result, "1 234")
     }
     
-    func testFormat3() throws {
-        let result = try Formatter.format("1112223")
-        XCTAssertEqual(result, "1 112 223")
+    func testFormatToDecimalStyle2() throws {
+        let result = try Formatter.formatToDecimalStyle("0,")
+        XCTAssertEqual(result, "0,")
     }
     
-    func testFormat4() throws {
-        let result = try Formatter.format("111222,378")
-        XCTAssertEqual(result, "111 222,38")
+    func testFormatToDecimalStyle3() throws {
+        let result = try Formatter.formatToDecimalStyle("0,0")
+        XCTAssertEqual(result, "0,0")
     }
     
-    func testFormat5() throws {
-        let result = try Formatter.format("111222333444555")
-        XCTAssertEqual(result, "1,11222e14")
+    func testFormatToDecimalStyle4() throws {
+        let result = try Formatter.formatToDecimalStyle("0,00")
+        XCTAssertEqual(result, "0,00")
+    }
+    
+    func testFormatToDecimalStyle5() throws {
+        let result = try Formatter.formatToDecimalStyle("0,50")
+        XCTAssertEqual(result, "0,50")
+    }
+    
+    func testFormatToDecimalStyle6() throws {
+        let result = try Formatter.formatToDecimalStyle("0,5")
+        XCTAssertEqual(result, "0,5")
+    }
+    
+    // MARK: - formatToScientificStyle
+    
+    func testFormatToScientificStyle1() throws {
+        let result = try Formatter.formatToScientificStyle("1234567890")
+        XCTAssertEqual(result, "1,23457e9")
     }
 }

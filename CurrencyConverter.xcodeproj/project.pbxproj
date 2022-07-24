@@ -20,6 +20,7 @@
 		19A3B1E62889DEC9008F0FE2 /* CalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1E52889DEC9008F0FE2 /* CalculatorTests.swift */; };
 		19A3B1E82889DEE0008F0FE2 /* ValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1E72889DEE0008F0FE2 /* ValidatorTests.swift */; };
 		19A3B1EA2889DEF1008F0FE2 /* FormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1E92889DEF1008F0FE2 /* FormatterTests.swift */; };
+		19A3B1EC288D8B87008F0FE2 /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1EB288D8B87008F0FE2 /* Array+Extension.swift */; };
 		19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26372872F3CD003E09C3 /* AppDelegate.swift */; };
 		19FD263A2872F3CD003E09C3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26392872F3CD003E09C3 /* SceneDelegate.swift */; };
 		19FD263C2872F3CD003E09C3 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD263B2872F3CD003E09C3 /* MainViewController.swift */; };
@@ -72,6 +73,7 @@
 		19A3B1E52889DEC9008F0FE2 /* CalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTests.swift; sourceTree = "<group>"; };
 		19A3B1E72889DEE0008F0FE2 /* ValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidatorTests.swift; sourceTree = "<group>"; };
 		19A3B1E92889DEF1008F0FE2 /* FormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTests.swift; sourceTree = "<group>"; };
+		19A3B1EB288D8B87008F0FE2 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		19FD26342872F3CD003E09C3 /* CurrencyConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19FD26372872F3CD003E09C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19FD26392872F3CD003E09C3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 				19FD266B287337C1003E09C3 /* UIButton+Extension.swift */,
 				198256802874DCD70060BDE5 /* Double+Extension.swift */,
 				198256822874DCEB0060BDE5 /* String+Extension.swift */,
+				19A3B1EB288D8B87008F0FE2 /* Array+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -491,6 +494,7 @@
 				19A3B1DE2885597F008F0FE2 /* Validator.swift in Sources */,
 				19FD263C2872F3CD003E09C3 /* MainViewController.swift in Sources */,
 				19A3B1DC28809327008F0FE2 /* Calculator.swift in Sources */,
+				19A3B1EC288D8B87008F0FE2 /* Array+Extension.swift in Sources */,
 				19FD26422872F3CD003E09C3 /* CurrencyConverter.xcdatamodeld in Sources */,
 				19A3B1DA28808A89008F0FE2 /* StateMachine.swift in Sources */,
 				19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */,

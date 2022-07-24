@@ -7,7 +7,9 @@
 
 import Foundation
 
-// TODO: На втором вводе не вводится сотая часть числа
+private extension String {
+    static let doubleZero = "00"
+}
 
 enum Formatter {
     
@@ -16,6 +18,24 @@ enum Formatter {
         case string
         case decimal
         case scientific
+    }
+    
+    static func formattedOutput(_ unformatted: String) throws -> String {
+        if unformatted.contains(Character(.comma)) {
+            let (integer, fraction) = unformatted.split()
+            
+            if integer.count + fraction.count > AppConsts.maxDigitCount {
+                return try formatToScientificStyle(unformatted)
+            } else {
+                return try formatToDecimalStyle(unformatted)
+            }
+        } else {
+            if unformatted.count > AppConsts.maxDigitCount {
+                return try formatToScientificStyle(unformatted)
+            } else {
+                return try formatToDecimalStyle(unformatted)
+            }
+        }
     }
     
     static func formatToDouble(_ unformatted: String) throws -> Double {
@@ -28,7 +48,7 @@ enum Formatter {
     static func formatToString(_ unformatted: Double) throws -> String {
         let formatter = NumberFormatter()
         let number = NSNumber(value: unformatted)
-        formatter.maximumFractionDigits = 10
+        formatter.maximumFractionDigits = AppConsts.maxFractionDigitCount
         
         guard let result = formatter.string(from: number) else {
             throw ConversionFailure.string
@@ -37,40 +57,25 @@ enum Formatter {
         return result.replacingOccurrences(of: ".", with: String.comma)
     }
     
-    static func format(_ unformatted: String) throws -> String {
-        
-        if unformatted.contains(String.comma) && unformatted.count > AppConsts.maxInputCharacterCount + 1 {
-            let components = unformatted.split(separator: Character(.comma)).map { String($0) }
-            let integerDigits = components[0]
-            
-            if integerDigits.count < 9 {
-                return try formatToDecimalStyle(unformatted)
-            } else {
-                return try formatToScientificStyle(unformatted)
-            }
-            
-            
-        } else if unformatted.count <= AppConsts.maxInputCharacterCount ||
-                    unformatted.contains(String.comma) && unformatted.count <= AppConsts.maxInputCharacterCount + 1 {
-            return try formatToDecimalStyle(unformatted)
-        } else {
-            return try formatToScientificStyle(unformatted)
-        }
-    }
-    
     static func formatToDecimalStyle(_ unformatted: String) throws -> String {
+        
+        let (integer, fraction) = unformatted.split()
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = " "
-        formatter.maximumFractionDigits = 2
         
-        let number = NSNumber(value: try Formatter.formatToDouble(unformatted))
+        let number = NSNumber(value: try Formatter.formatToDouble(integer))
         
-        guard let result = formatter.string(from: number) else {
+        guard var result = formatter.string(from: number) else {
             throw ConversionFailure.decimal
         }
         
+        if !fraction.isEmpty {
+            result += .comma + fraction
+        } else if unformatted.hasSuffix(.comma) {
+            result += .comma
+        }
         return result.replacingOccurrences(of: ".", with: String.comma)
     }
     

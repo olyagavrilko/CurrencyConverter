@@ -8,7 +8,6 @@
 import Foundation
 
 private extension String {
-    static let zero = "0"
     static let zeroWithComma = "0,"
 }
 
@@ -33,13 +32,11 @@ enum StateMachine {
         case .firstInput(let number):
             switch action {
             case .number(let value):
-                let verifiedNumber = Validator.validateForInput(number: number, digit: value)
-                return .firstInput(verifiedNumber)
+                return .firstInput(verifiedInput(number: number, digit: value))
             case .operation(let operation):
                 return .operation(number, operation)
             case .comma:
-                let verifiedNumber = Validator.validateForComma(number: number)
-                return .firstInput(verifiedNumber)
+                return .firstInput(verifiedForCommaInput(number))
             case .percent:
                 let result = try Calculator.calculate(
                     first: Formatter.formatToDouble(number),
@@ -89,7 +86,7 @@ enum StateMachine {
         case let .secondInput(first, second, operation):
             switch action {
             case .number(let value):
-                let verifiedNumber = Validator.validateForInput(number: second, digit: value)
+                let verifiedNumber = verifiedInput(number: second, digit: value)
                 return .secondInput(first: first, second: verifiedNumber, operation)
             case .operation(let secondOperation):
                 if !operation.isPrimary && secondOperation.isPrimary {
@@ -106,7 +103,7 @@ enum StateMachine {
                     return .operation(try Formatter.formatToString(result), secondOperation)
                 }
             case .comma:
-                let verifiedNumber = Validator.validateForComma(number: second)
+                let verifiedNumber = verifiedForCommaInput(second)
                 return .secondInput(first: first, second: verifiedNumber, operation)
             case .percent:
                 let intermediateResultForPercent = try Calculator.calculate(
@@ -183,12 +180,10 @@ enum StateMachine {
         case let .thirdInput(first, second, third, firstOperation, secondOperation):
             switch action {
             case .number(let value):
-                let verifiedNumber = Validator.validateForInput(number: third, digit: value)
-                
                 return .thirdInput(
                     first: first,
                     second: second,
-                    third: verifiedNumber,
+                    third: verifiedInput(number: third, digit: value),
                     firstOperation: firstOperation,
                     secondOperation: secondOperation)
             case .operation(let thirdOperation):
@@ -217,7 +212,7 @@ enum StateMachine {
                     return .operation(try Formatter.formatToString(finishNumber), thirdOperation)
                 }
             case .comma:
-                let verifiedNumber = Validator.validateForComma(number: third)
+                let verifiedNumber = verifiedForCommaInput(third)
                 return .thirdInput(
                     first: first,
                     second: second,
@@ -301,5 +296,17 @@ enum StateMachine {
                 return .initial
             }
         }
+    }
+    
+    private static func verifiedInput(number: String, digit: String) -> String {
+        Validator.reachedLimit(number)
+            ? number
+            : number + digit
+    }
+    
+    private static func verifiedForCommaInput(_ number: String) -> String {
+        Validator.reachedLimitForComma(number)
+            ? number
+            : number + .comma
     }
 }

@@ -8,14 +8,12 @@
 import XCTest
 @testable import CurrencyConverter
 
-
-
 final class StateToTextTests: XCTestCase {
     
     let viewModel = MainViewModel()
     
     func testInitialState() throws {
-        let text = try viewModel.makeText(using: .initial)
+        let text = try viewModel.makeOutput(using: .initial)
         XCTAssertEqual(text, "0")
     }
     
