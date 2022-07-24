@@ -8,40 +8,54 @@
 import XCTest
 @testable import CurrencyConverter
 
-//class ValidatorTests: XCTestCase {
-//    
-//    func test1() {
-//        let result = Validator.validateForInput(number: "111", digit: "2")
-//        XCTAssertEqual(result, "1112")
-//    }
-//    
-//    func test() {
-//        let result = Validator.validateForInput(number: "111,", digit: "2")
-//        XCTAssertEqual(result, "111,2")
-//    }
-//    
-//    func testOverDigit() {
-//        let result = Validator.validateForInput(number: "111222333", digit: "4")
-//        XCTAssertEqual(result, "111222333")
-//    }
-//    
-//    func testOverDigitWithComma() {
-//        let result = Validator.validateForInput(number: "111,222333", digit: "4")
-//        XCTAssertEqual(result, "111,222333")
-//    }
-//    
-//    func test3() {
-//        let result = Validator.validateForComma(number: "12,6")
-//        XCTAssertEqual(result, "12,6")
-//    }
-//    
-//    func test4() {
-//        let result = Validator.validateForComma(number: "126")
-//        XCTAssertEqual(result, "126,")
-//    }
-//    
-//    func test5() {
-//        let result = Validator.validateForComma(number: "111222333")
-//        XCTAssertEqual(result, "111222333")
-//    }
-//}
+class ValidatorTests: XCTestCase {
+    
+    // MARK: - reachedLimit
+    
+    func testReachedLimit1() {
+        let result = Validator.reachedLimit("12345678")
+        XCTAssertEqual(result, false)
+    }
+    
+    func testReachedLimit2() {
+        let result = Validator.reachedLimit("123456789")
+        XCTAssertEqual(result, true)
+    }
+    
+    func testReachedLimit3() {
+        let result = Validator.reachedLimit("0,1")
+        XCTAssertEqual(result, false)
+    }
+    
+    func testReachedLimit4() {
+        let result = Validator.reachedLimit("0,12")
+        XCTAssertEqual(result, true)
+    }
+    
+    func testReachedLimit5() {
+        let result = Validator.reachedLimit("1234567,8")
+        XCTAssertEqual(result, false)
+    }
+    
+    func testReachedLimit6() {
+        let result = Validator.reachedLimit("12345678,9")
+        XCTAssertEqual(result, true)
+    }
+    
+    // MARK: - reachedLimitForComma
+    
+    func testReachedLimitForComma1() {
+        let result = Validator.reachedLimitForComma("12345678")
+        XCTAssertEqual(result, false)
+    }
+    
+    func testReachedLimitForComma2() {
+        let result = Validator.reachedLimitForComma("123456789")
+        XCTAssertEqual(result, true)
+    }
+    
+    func testReachedLimitForComma3() {
+        let result = Validator.reachedLimitForComma("0,1")
+        XCTAssertEqual(result, true)
+    }
+}
