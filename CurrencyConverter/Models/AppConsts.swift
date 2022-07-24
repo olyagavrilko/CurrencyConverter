@@ -10,4 +10,5 @@ import Foundation
 enum AppConsts {
     static let maxDigitCount = 9
     static let maxFractionDigitCount = 2
+    static let error = "Ошибка"
 }

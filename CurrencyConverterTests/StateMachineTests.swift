@@ -158,20 +158,10 @@ class StateMachineTests: XCTestCase {
         XCTAssertEqual(state, .operation("5", .add))
     }
     
-    // TODO: .multiply .multiply
-    
-    // TODO: Перенести в тест функции calculate
-//    func testSecondInputState6() throws {
-//        XCTAssertThrowsError(
-//            try StateMachine.reduce(
-//                state: .secondInput(first: "1", second: "0", .divide),
-//                action: .operation(.multiply))) { error in
-//                    guard let error = error as? Calculator.Failure else {
-//                        return XCTAssert(false)
-//                    }
-//                    XCTAssertEqual(error, .divideOnZero)
-//                }
-//    }
+    func testSecondInputState6() throws {
+        let state = try StateMachine.reduce(state: .secondInput(first: "2", second: "3", .multiply), action: .operation(.multiply))
+        XCTAssertEqual(state, .operation("6", .multiply))
+    }
     
     func testSecondInputState7() throws {
         let state = try StateMachine.reduce(state: .secondInput(first: "1", second: "2", .add), action: .comma)

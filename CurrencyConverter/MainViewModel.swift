@@ -45,18 +45,17 @@ final class MainViewModel {
     var currentState: State = .initial {
         didSet {
             do {
-                view?.update(text: try makeOutput(using: currentState))
+                view?.update(text: try makeOutputText(using: currentState))
             } catch {
-                view?.update(text: "Ошибка")
+                view?.update(text: AppConsts.error)
             }
         }
     }
     
-    // TODO: Написать все тесты со значениями больше 3-х разрядов. Тогда будут добавляться пробелы. Это будет значить, что мы нигде не забыли поставить функцию format
-    func makeOutput(using state: State) throws -> String {
+    func makeOutputText(using state: State) throws -> String {
         switch state {
         case .initial:
-            return "0"
+            return .zero
         case .firstInput(let value):
             return try Formatter.formattedOutput(value)
         case .operation(let value, _):
@@ -70,7 +69,7 @@ final class MainViewModel {
         case .finish(let value, _, _):
             return try Formatter.formattedOutput(value)
         case .error:
-            return "Ошибка"
+            return AppConsts.error
         }
     }
     

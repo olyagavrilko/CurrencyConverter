@@ -12,6 +12,11 @@ class FormatterTests: XCTestCase {
     
     // MARK: - formattedOutput
     
+    func testFormat9() throws {
+        let result = try Formatter.formattedOutput("1234")
+        XCTAssertEqual(result, "1 234")
+    }
+    
     func testFormat1() throws {
         let result = try Formatter.formattedOutput("1234,")
         XCTAssertEqual(result, "1 234,")
@@ -30,6 +35,11 @@ class FormatterTests: XCTestCase {
     func testFormat6() throws {
         let result = try Formatter.formattedOutput("11222333,45")
         XCTAssertEqual(result, "1,12223e7")
+    }
+    
+    func testFormat8() throws {
+        let result = try Formatter.formattedOutput("1234567890")
+        XCTAssertEqual(result, "1,23457e9")
     }
     
     func testFormat7() throws {
