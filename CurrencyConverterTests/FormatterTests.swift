@@ -64,6 +64,11 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(result, 555)
     }
     
+    func testFormatToDouble4() throws {
+        let result = try Formatter.formatToDouble("1 000")
+        XCTAssertEqual(result, 1000)
+    }
+    
     // MARK: - formatToString
     
     func testFormatToString1() throws {

@@ -39,7 +39,11 @@ enum Formatter {
     }
     
     static func formatToDouble(_ unformatted: String) throws -> Double {
-        guard let doubleValue = Double(unformatted.replacingOccurrences(of: ",", with: ".")) else {
+        guard let doubleValue = Double(
+            unformatted
+                .replacingOccurrences(of: ",", with: ".")
+                .replacingOccurrences(of: " ", with: ""))
+        else {
             throw ConversionFailure.double
         }
         return doubleValue

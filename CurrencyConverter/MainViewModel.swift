@@ -45,9 +45,12 @@ final class MainViewModel {
     var currentState: State = .initial {
         didSet {
             do {
-                view?.update(text: try makeOutputText(using: currentState))
+//                view?.update(text: try makeOutputText(using: currentState))
+                let original = try makeOutputText(using: currentState)
+                let converted = try convert(unconverted: original, exchangeRate: 5)
+                view?.update(original: original, converted: converted)
             } catch {
-                view?.update(text: AppConsts.error)
+                view?.update(original: AppConsts.error, converted: AppConsts.error)
             }
         }
     }
@@ -73,7 +76,16 @@ final class MainViewModel {
         }
     }
     
+    func convert(unconverted: String, exchangeRate: Double) throws -> String {
+        let number = try Formatter.formatToDouble(unconverted)
+        let result = try Formatter.formatToString(number * exchangeRate)
+        return try Formatter.formatToDecimalStyle(result)
+    }
+    
     func buttonTapped(with value: String) {
+        if value.contains("􀄬") {
+            switchCurrency()
+        }
         let action = makeAction(using: value)
         do {
             currentState = try StateMachine.reduce(state: currentState, action: action)
@@ -101,7 +113,13 @@ final class MainViewModel {
             return Action.equal
         } else if value == "C" {
             return Action.cancel
+        } else if value == "􀘾" {
+            return Action.percent
         }
         return Action.cancel
+    }
+    
+    func switchCurrency() {
+        
     }
 }

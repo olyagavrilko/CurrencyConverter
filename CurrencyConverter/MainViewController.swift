@@ -40,8 +40,9 @@ final class MainViewController: UIViewController {
         setupViews()
     }
     
-    func update(text: String) {
-        fromTextField.text = text
+    func update(original: String, converted: String) {
+        fromTextField.text = original
+        toTextField.text = converted
     }
     
 //    MARK: - Private
