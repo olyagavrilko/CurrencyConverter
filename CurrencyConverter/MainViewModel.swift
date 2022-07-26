@@ -38,22 +38,29 @@ enum Action {
     case cancel
 }
 
+protocol MainViewModelDelegate: AnyObject {
+    func update(original: String, converted: String)
+    func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String)
+}
+
 final class MainViewModel {
     
-    weak var view: MainViewController?
+    weak var delegate: MainViewModelDelegate?
     
-    var currentState: State = .initial {
-        didSet {
-            do {
-//                view?.update(text: try makeOutputText(using: currentState))
-                let original = try makeOutputText(using: currentState)
-                let converted = try convert(unconverted: original, exchangeRate: 5)
-                view?.update(original: original, converted: converted)
-            } catch {
-                view?.update(original: AppConsts.error, converted: AppConsts.error)
-            }
-        }
-    }
+    var exchangeRate = 5.0
+    var initialCurrency = "USD"
+    var targetCurrency = "RUB"
+    var currentState: State = .initial //{
+//        didSet {
+//            do {
+//                let original = try makeOutputText(using: currentState)
+//                let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
+//                view?.update(original: original, converted: converted)
+//            } catch {
+//                view?.update(original: AppConsts.error, converted: AppConsts.error)
+//            }
+//        }
+//    }
     
     func makeOutputText(using state: State) throws -> String {
         switch state {
@@ -83,15 +90,17 @@ final class MainViewModel {
     }
     
     func buttonTapped(with value: String) {
-        if value.contains("􀄬") {
+        if value == "􀄬" {
             switchCurrency()
+        } else {
+            let action = makeAction(using: value)
+            do {
+                currentState = try StateMachine.reduce(state: currentState, action: action)
+            } catch {
+                currentState = State.error
+            }
         }
-        let action = makeAction(using: value)
-        do {
-            currentState = try StateMachine.reduce(state: currentState, action: action)
-        } catch {
-            currentState = State.error
-        }
+        updateInputs()
     }
     
     func makeAction(using value: String) -> Action {
@@ -120,6 +129,26 @@ final class MainViewModel {
     }
     
     func switchCurrency() {
+        let tmp = initialCurrency
+        initialCurrency = targetCurrency
+        targetCurrency = tmp
         
+        exchangeRate = 1 / exchangeRate
+        
+        delegate?.switchCurrencyPair(
+            initial: initialCurrency,
+            target: targetCurrency,
+            rate: exchangeRate,
+            updateDate: "String")
+    }
+    
+    func updateInputs() {
+        do {
+            let original = try makeOutputText(using: currentState)
+            let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
+            delegate?.update(original: original, converted: converted)
+        } catch {
+            delegate?.update(original: AppConsts.error, converted: AppConsts.error)
+        }
     }
 }

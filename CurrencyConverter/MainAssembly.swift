@@ -13,7 +13,7 @@ final class MainAssembly {
         let viewModel = MainViewModel()
         let viewController = MainViewController(viewModel: viewModel)
         
-        viewModel.view = viewController
+        viewModel.delegate = viewController
         return viewController
     }
 }

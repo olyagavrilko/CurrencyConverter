@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class MainViewController: UIViewController {
+final class MainViewController: UIViewController, MainViewModelDelegate {
     
     enum Consts {
         static let spacing: CGFloat = 12
@@ -26,6 +26,8 @@ final class MainViewController: UIViewController {
     private var fromLabel = UILabel()
     private var toLabel = UILabel()
     
+    var rateView = CurrencyRateView(frame: .zero)
+    
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -40,15 +42,31 @@ final class MainViewController: UIViewController {
         setupViews()
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     func update(original: String, converted: String) {
         fromTextField.text = original
         toTextField.text = converted
+    }
+    
+    func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String) {
+        fromLabel.text = initial
+        toLabel.text = target
+        
+        rateView.update(with: CurrencyRateView.Config(
+            initialCurrency: initial,
+            targetCurrency: target,
+            exchangeRate: rate,
+            updateDate: updateDate))
     }
     
 //    MARK: - Private
     
     private func setupViews() {
         view.backgroundColor = .black
+        navigationItem.titleView = rateView
         setupKeyboardStackView()
         setupInputStackView()
     }
@@ -97,7 +115,7 @@ final class MainViewController: UIViewController {
         inputStackView.axis = .vertical
         inputStackView.distribution = .fill
         
-        fromLabel.text = "USD"
+//        fromLabel.text = "USD"
         fromLabel.textColor = .gray
         fromLabel.font = .systemFont(ofSize: 18)
         fromLabel.textAlignment = .right
@@ -117,7 +135,7 @@ final class MainViewController: UIViewController {
         }
         inputStackView.addArrangedSubview(fromTextField)
         
-        toLabel.text = "RUB"
+//        toLabel.text = "RUB"
         toLabel.textColor = .gray
         toLabel.font = .systemFont(ofSize: 18)
         toLabel.textAlignment = .right

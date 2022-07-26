@@ -13,9 +13,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        let navController = UINavigationController(rootViewController: MainAssembly().assemble())
+        navController.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.rootViewController = MainAssembly().assemble()
+        window?.rootViewController = navController
         window?.makeKeyAndVisible()
     }
 
