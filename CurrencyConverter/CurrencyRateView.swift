@@ -19,10 +19,10 @@ final class CurrencyRateView: UIView {
     
     let updateDateLabel = UILabel()
     let rateLabel = UILabel()
-    
-    override init(frame: CGRect) {
-        super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 10))
-        backgroundColor = .clear
+        
+    init() {
+        super.init(frame: .zero)
+        backgroundColor = .blue
         setupViews()
     }
     
@@ -32,19 +32,20 @@ final class CurrencyRateView: UIView {
     
     func setupViews() {
         updateDateLabel.textColor = .white
-        updateDateLabel.translatesAutoresizingMaskIntoConstraints = false
+//        updateDateLabel.font = UIFont.systemFont(ofSize: 12)
+        updateDateLabel.textAlignment = .center
         addSubview(updateDateLabel)
         updateDateLabel.snp.makeConstraints {
             $0.left.right.top.equalToSuperview()
         }
         
         rateLabel.textColor = .white
-        rateLabel.translatesAutoresizingMaskIntoConstraints = false
+//        rateLabel.font = UIFont.systemFont(ofSize: 12)
         addSubview(rateLabel)
         rateLabel.snp.makeConstraints {
-            $0.top.equalTo(updateDateLabel.snp.bottom).offset(5)
-            $0.centerX.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.top.equalTo(updateDateLabel.snp.bottom)
+            $0.left.right.equalToSuperview()
+            $0.bottom.equalToSuperview().priority(.low)
         }
     }
     

@@ -26,7 +26,9 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     private var fromLabel = UILabel()
     private var toLabel = UILabel()
     
-    var rateView = CurrencyRateView(frame: .zero)
+    var rateView = CurrencyRateView()
+    
+//    let gesture = UITapGestureRecognizer(target: self, action:  #selector(checkAction))
     
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
@@ -62,10 +64,43 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
             updateDate: updateDate))
     }
     
+    @objc func checkActionTextField(textField: UITextField) {
+        print("checkActionTextField")
+        let selectCurrency = CurrencySelectionViewController()
+        showDetailViewController(selectCurrency, sender: self)
+    }
+    
+    @objc func checkActionView(_ sender: UITapGestureRecognizer? = nil) {
+        print("checkActionView")
+        showAlertWithTextField()
+    }
+    
+    func showAlertWithTextField() {
+        let alertController = UIAlertController(title: "Add new tag", message: nil, preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: "Add", style: .default) { _ in
+            if let txtField = alertController.textFields?.first, let text = txtField.text {
+                // operations
+                print("Text==>" + text)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (_) in }
+//        alertController.addTextField { (textField) in
+//            textField.placeholder = "Tag"
+//        }
+        alertController.addTextField { textField in
+            textField.keyboardType = .numberPad
+        }
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
 //    MARK: - Private
     
     private func setupViews() {
         view.backgroundColor = .black
+        rateView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(checkActionView(_:))))
+        rateView.isUserInteractionEnabled = true
         navigationItem.titleView = rateView
         setupKeyboardStackView()
         setupInputStackView()
@@ -130,6 +165,8 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         fromTextField.adjustsFontSizeToFitWidth = true
         fromTextField.minimumFontSize = 40
         fromTextField.textAlignment = .right
+        fromTextField.isUserInteractionEnabled = true
+        fromTextField.addTarget(self, action: #selector(checkActionTextField), for: .touchDown)
         fromTextField.snp.makeConstraints {
             $0.height.equalTo(70)
         }
@@ -144,12 +181,15 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         }
         inputStackView.addArrangedSubview(toLabel)
         
+// TODO: .touchDown, плохо работает, при долгом нажатии появляется курсор и клавиатура
         toTextField.text = "0"
         toTextField.textColor = .white
         toTextField.font = .systemFont(ofSize: 50)
         toTextField.adjustsFontSizeToFitWidth = true
         toTextField.minimumFontSize = 40
         toTextField.textAlignment = .right
+        toTextField.isUserInteractionEnabled = true
+        toTextField.addTarget(self, action: #selector(checkActionTextField), for: .touchDown)
         toTextField.snp.makeConstraints {
             $0.height.equalTo(55)
         }
