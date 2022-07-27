@@ -7,13 +7,15 @@
 
 import UIKit
 
-final class CurrencySelectionViewController: UIViewController {
+final class CurrencySelectionViewController: UIViewController, CurrencySelectionViewModelDelegate {
     
     private let tableView = UITableView()
-    private let currencyArray = ["RUB", "USD", "EUR"]
     private let navBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
     
-    init() {
+    private let viewModel: CurrencySelectionViewModel
+    
+    init(viewModel: CurrencySelectionViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         setupViews()
     }
@@ -47,16 +49,16 @@ extension CurrencySelectionViewController: UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
-        content.text = currencyArray[indexPath.row]
+        content.text = viewModel.currencyArray[indexPath.row]
         cell.contentConfiguration = content
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        currencyArray.count
+        viewModel.currencyArray.count
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //
+        viewModel.currencySelected(indexPath.row)
     }
 }

@@ -27,9 +27,7 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     private var toLabel = UILabel()
     
     var rateView = CurrencyRateView()
-    
-//    let gesture = UITapGestureRecognizer(target: self, action:  #selector(checkAction))
-    
+        
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -42,10 +40,6 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-    }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
     }
     
     func update(original: String, converted: String) {
@@ -64,31 +58,49 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
             updateDate: updateDate))
     }
     
-    @objc func checkActionTextField(textField: UITextField) {
-        print("checkActionTextField")
-        let selectCurrency = CurrencySelectionViewController()
-        showDetailViewController(selectCurrency, sender: self)
+    func setNewInitialCurrency(_ selectedCurrency: String, targetCurrency: String) {
+        fromLabel.text = selectedCurrency
+        
+        rateView.update(with: CurrencyRateView.Config(
+            initialCurrency: selectedCurrency,
+            targetCurrency: targetCurrency,
+            exchangeRate: 44,
+            updateDate: "updateDate"))
     }
     
-    @objc func checkActionView(_ sender: UITapGestureRecognizer? = nil) {
-        print("checkActionView")
+    func setNewTargetCurrency(initialCurrency: String, _ selectedCurrency: String) {
+        toLabel.text = selectedCurrency
+        
+        rateView.update(with: CurrencyRateView.Config(
+            initialCurrency: initialCurrency,
+            targetCurrency: selectedCurrency,
+            exchangeRate: 1 / 44,
+            updateDate: "updateDate"))
+    }
+    
+    @objc private func fromTextFieldTapped(textField: UITextField) {
+        viewModel.fromTextFieldTapped()
+//        showDetailViewController(selectCurrency, sender: self)
+    }
+    
+    @objc private func toTextFieldTapped(textField: UITextField) {
+        viewModel.toTextFieldTapped()
+    }
+    
+    @objc private func rateViewTapped(_ sender: UITapGestureRecognizer? = nil) {
         showAlertWithTextField()
     }
     
-    func showAlertWithTextField() {
-        let alertController = UIAlertController(title: "Add new tag", message: nil, preferredStyle: .alert)
-        let confirmAction = UIAlertAction(title: "Add", style: .default) { _ in
+    private func showAlertWithTextField() {
+        let alertController = UIAlertController(title: "Установить свой курс", message: nil, preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: "Сохранить", style: .default) { _ in
             if let txtField = alertController.textFields?.first, let text = txtField.text {
-                // operations
                 print("Text==>" + text)
             }
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (_) in }
-//        alertController.addTextField { (textField) in
-//            textField.placeholder = "Tag"
-//        }
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel) { (_) in }
         alertController.addTextField { textField in
-            textField.keyboardType = .numberPad
+            textField.keyboardType = .decimalPad
         }
         alertController.addAction(confirmAction)
         alertController.addAction(cancelAction)
@@ -99,7 +111,7 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     
     private func setupViews() {
         view.backgroundColor = .black
-        rateView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(checkActionView(_:))))
+        rateView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(rateViewTapped(_:))))
         rateView.isUserInteractionEnabled = true
         navigationItem.titleView = rateView
         setupKeyboardStackView()
@@ -166,7 +178,7 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         fromTextField.minimumFontSize = 40
         fromTextField.textAlignment = .right
         fromTextField.isUserInteractionEnabled = true
-        fromTextField.addTarget(self, action: #selector(checkActionTextField), for: .touchDown)
+        fromTextField.addTarget(self, action: #selector(fromTextFieldTapped), for: .touchDown)
         fromTextField.snp.makeConstraints {
             $0.height.equalTo(70)
         }
@@ -189,7 +201,7 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         toTextField.minimumFontSize = 40
         toTextField.textAlignment = .right
         toTextField.isUserInteractionEnabled = true
-        toTextField.addTarget(self, action: #selector(checkActionTextField), for: .touchDown)
+        toTextField.addTarget(self, action: #selector(toTextFieldTapped), for: .touchDown)
         toTextField.snp.makeConstraints {
             $0.height.equalTo(55)
         }

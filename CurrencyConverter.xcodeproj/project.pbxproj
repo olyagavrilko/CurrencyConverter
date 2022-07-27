@@ -21,6 +21,9 @@
 		19A3B1EC288D8B87008F0FE2 /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1EB288D8B87008F0FE2 /* Array+Extension.swift */; };
 		19A3B1EE288EED66008F0FE2 /* CurrencyRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1ED288EED66008F0FE2 /* CurrencyRateView.swift */; };
 		19A3B1F028901C11008F0FE2 /* CurrencySelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1EF28901C11008F0FE2 /* CurrencySelectionViewController.swift */; };
+		19A3B1F628914C6C008F0FE2 /* MainRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1F528914C6C008F0FE2 /* MainRouter.swift */; };
+		19A3B1F928914D67008F0FE2 /* CurrencySelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1F828914D67008F0FE2 /* CurrencySelectionViewModel.swift */; };
+		19A3B1FB289151FA008F0FE2 /* CurrencySelectionAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A3B1FA289151FA008F0FE2 /* CurrencySelectionAssembly.swift */; };
 		19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26372872F3CD003E09C3 /* AppDelegate.swift */; };
 		19FD263A2872F3CD003E09C3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD26392872F3CD003E09C3 /* SceneDelegate.swift */; };
 		19FD263C2872F3CD003E09C3 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FD263B2872F3CD003E09C3 /* MainViewController.swift */; };
@@ -74,6 +77,9 @@
 		19A3B1EB288D8B87008F0FE2 /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		19A3B1ED288EED66008F0FE2 /* CurrencyRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRateView.swift; sourceTree = "<group>"; };
 		19A3B1EF28901C11008F0FE2 /* CurrencySelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencySelectionViewController.swift; sourceTree = "<group>"; };
+		19A3B1F528914C6C008F0FE2 /* MainRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainRouter.swift; sourceTree = "<group>"; };
+		19A3B1F828914D67008F0FE2 /* CurrencySelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencySelectionViewModel.swift; sourceTree = "<group>"; };
+		19A3B1FA289151FA008F0FE2 /* CurrencySelectionAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencySelectionAssembly.swift; sourceTree = "<group>"; };
 		19FD26342872F3CD003E09C3 /* CurrencyConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19FD26372872F3CD003E09C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19FD26392872F3CD003E09C3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -129,6 +135,58 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		19A3B1F128914A40008F0FE2 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				19A3B1F728914D40008F0FE2 /* Views */,
+				19FD263B2872F3CD003E09C3 /* MainViewController.swift */,
+				19FD267D28747CDD003E09C3 /* MainViewModel.swift */,
+				19A3B1F528914C6C008F0FE2 /* MainRouter.swift */,
+				19FD267F2874B8FF003E09C3 /* MainAssembly.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		19A3B1F228914A5E008F0FE2 /* CurrencySelection */ = {
+			isa = PBXGroup;
+			children = (
+				19A3B1EF28901C11008F0FE2 /* CurrencySelectionViewController.swift */,
+				19A3B1F828914D67008F0FE2 /* CurrencySelectionViewModel.swift */,
+				19A3B1FA289151FA008F0FE2 /* CurrencySelectionAssembly.swift */,
+			);
+			path = CurrencySelection;
+			sourceTree = "<group>";
+		};
+		19A3B1F328914B26008F0FE2 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				19A3B1D928808A89008F0FE2 /* StateMachine.swift */,
+				19A3B1DB28809327008F0FE2 /* Calculator.swift */,
+				19A3B1DD2885597F008F0FE2 /* Validator.swift */,
+				19A3B1DF28858961008F0FE2 /* Formatter.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		19A3B1F428914B5B008F0FE2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				19FD26432872F3D0003E09C3 /* Assets.xcassets */,
+				19FD26452872F3D0003E09C3 /* LaunchScreen.storyboard */,
+				19FD26482872F3D0003E09C3 /* Info.plist */,
+				19FD26402872F3CD003E09C3 /* CurrencyConverter.xcdatamodeld */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		19A3B1F728914D40008F0FE2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				19A3B1ED288EED66008F0FE2 /* CurrencyRateView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		19FD262B2872F3CC003E09C3 = {
 			isa = PBXGroup;
 			children = (
@@ -154,24 +212,15 @@
 		19FD26362872F3CD003E09C3 /* CurrencyConverter */ = {
 			isa = PBXGroup;
 			children = (
+				19A3B1F128914A40008F0FE2 /* Main */,
+				19A3B1F228914A5E008F0FE2 /* CurrencySelection */,
 				19FD267328734719003E09C3 /* Models */,
-				19FD267028734099003E09C3 /* Fonts */,
+				19A3B1F328914B26008F0FE2 /* Services */,
 				19FD266A287337A5003E09C3 /* Extensions */,
+				19A3B1F428914B5B008F0FE2 /* Resources */,
+				19FD267028734099003E09C3 /* Fonts */,
 				19FD26372872F3CD003E09C3 /* AppDelegate.swift */,
 				19FD26392872F3CD003E09C3 /* SceneDelegate.swift */,
-				19FD263B2872F3CD003E09C3 /* MainViewController.swift */,
-				19FD267D28747CDD003E09C3 /* MainViewModel.swift */,
-				19FD267F2874B8FF003E09C3 /* MainAssembly.swift */,
-				19FD26432872F3D0003E09C3 /* Assets.xcassets */,
-				19FD26452872F3D0003E09C3 /* LaunchScreen.storyboard */,
-				19FD26482872F3D0003E09C3 /* Info.plist */,
-				19FD26402872F3CD003E09C3 /* CurrencyConverter.xcdatamodeld */,
-				19A3B1D928808A89008F0FE2 /* StateMachine.swift */,
-				19A3B1DB28809327008F0FE2 /* Calculator.swift */,
-				19A3B1DD2885597F008F0FE2 /* Validator.swift */,
-				19A3B1DF28858961008F0FE2 /* Formatter.swift */,
-				19A3B1ED288EED66008F0FE2 /* CurrencyRateView.swift */,
-				19A3B1EF28901C11008F0FE2 /* CurrencySelectionViewController.swift */,
 			);
 			path = CurrencyConverter;
 			sourceTree = "<group>";
@@ -219,8 +268,8 @@
 		19FD267328734719003E09C3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				19FD26742873473B003E09C3 /* ButtonViewModel.swift */,
 				19A3B1E12885960E008F0FE2 /* AppConsts.swift */,
+				19FD26742873473B003E09C3 /* ButtonViewModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -501,10 +550,13 @@
 				19FD26382872F3CD003E09C3 /* AppDelegate.swift in Sources */,
 				19A3B1EE288EED66008F0FE2 /* CurrencyRateView.swift in Sources */,
 				19A3B1E028858962008F0FE2 /* Formatter.swift in Sources */,
+				19A3B1FB289151FA008F0FE2 /* CurrencySelectionAssembly.swift in Sources */,
 				19FD266C287337C1003E09C3 /* UIButton+Extension.swift in Sources */,
 				198256832874DCEB0060BDE5 /* String+Extension.swift in Sources */,
+				19A3B1F928914D67008F0FE2 /* CurrencySelectionViewModel.swift in Sources */,
 				19FD263A2872F3CD003E09C3 /* SceneDelegate.swift in Sources */,
 				19A3B1E22885960E008F0FE2 /* AppConsts.swift in Sources */,
+				19A3B1F628914C6C008F0FE2 /* MainRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -680,7 +732,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R48C6P8ZZH;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CurrencyConverter/Info.plist;
+				INFOPLIST_FILE = CurrencyConverter/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -709,7 +761,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R48C6P8ZZH;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CurrencyConverter/Info.plist;
+				INFOPLIST_FILE = CurrencyConverter/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

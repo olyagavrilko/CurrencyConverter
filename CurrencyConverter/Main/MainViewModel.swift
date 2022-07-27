@@ -41,6 +41,8 @@ enum Action {
 protocol MainViewModelDelegate: AnyObject {
     func update(original: String, converted: String)
     func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String)
+    func setNewInitialCurrency(_ selectedCurrency: String, targetCurrency: String)
+    func setNewTargetCurrency(initialCurrency: String, _ selectedCurrency: String)
 }
 
 final class MainViewModel {
@@ -61,6 +63,12 @@ final class MainViewModel {
 //            }
 //        }
 //    }
+    
+    let router: MainRouter
+    
+    init(router: MainRouter) {
+        self.router = router
+    }
     
     func makeOutputText(using state: State) throws -> String {
         switch state {
@@ -142,6 +150,16 @@ final class MainViewModel {
             updateDate: "String")
     }
     
+    func setNewInitialCurrency(selectedCurrency: String) {
+        initialCurrency = selectedCurrency
+        delegate?.setNewInitialCurrency(selectedCurrency, targetCurrency: targetCurrency)
+    }
+    
+    func setNewTargetCurrency(selectedCurrency: String) {
+        targetCurrency = selectedCurrency
+        delegate?.setNewTargetCurrency(initialCurrency: initialCurrency, selectedCurrency)
+    }
+    
     func updateInputs() {
         do {
             let original = try makeOutputText(using: currentState)
@@ -149,6 +167,18 @@ final class MainViewModel {
             delegate?.update(original: original, converted: converted)
         } catch {
             delegate?.update(original: AppConsts.error, converted: AppConsts.error)
+        }
+    }
+    
+    func fromTextFieldTapped() {
+        router.openCurrencySelection { selectedCurrency in
+            self.setNewInitialCurrency(selectedCurrency: selectedCurrency)
+        }
+    }
+    
+    func toTextFieldTapped() {
+        router.openCurrencySelection { selectedCurrency in
+            self.setNewTargetCurrency(selectedCurrency: selectedCurrency)
         }
     }
 }
