@@ -22,7 +22,6 @@ final class CurrencyRateView: UIView {
         
     init() {
         super.init(frame: .zero)
-        backgroundColor = .blue
         setupViews()
     }
     
@@ -32,7 +31,6 @@ final class CurrencyRateView: UIView {
     
     func setupViews() {
         updateDateLabel.textColor = .white
-//        updateDateLabel.font = UIFont.systemFont(ofSize: 12)
         updateDateLabel.textAlignment = .center
         addSubview(updateDateLabel)
         updateDateLabel.snp.makeConstraints {
@@ -40,7 +38,7 @@ final class CurrencyRateView: UIView {
         }
         
         rateLabel.textColor = .white
-//        rateLabel.font = UIFont.systemFont(ofSize: 12)
+        rateLabel.textAlignment = .center
         addSubview(rateLabel)
         rateLabel.snp.makeConstraints {
             $0.top.equalTo(updateDateLabel.snp.bottom)

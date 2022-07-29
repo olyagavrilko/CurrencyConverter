@@ -17,16 +17,18 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     }
     
     private let viewModel: MainViewModel
-
-    private let inputStackView = UIStackView()
-    private let keyboardStackView = UIStackView()
     
-    private let fromTextField = UITextField()
-    private let toTextField = UITextField()
+    var rateView = CurrencyRateView()
+    
+    private let fromInputLabel = UILabel()
+    private let toInputLabel = UILabel()
     private var fromLabel = UILabel()
     private var toLabel = UILabel()
     
-    var rateView = CurrencyRateView()
+    private let fromTextView = UIView()
+    
+    private let inputStackView = UIStackView()
+    private let keyboardStackView = UIStackView()
         
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
@@ -42,9 +44,17 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         setupViews()
     }
     
-    func update(original: String, converted: String) {
-        fromTextField.text = original
-        toTextField.text = converted
+    func updateInput(original: String, converted: String) {
+        fromInputLabel.text = original
+        toInputLabel.text = converted
+    }
+    
+    func updateRateViewWithManualRate(initial: String, target: String, rate: Double) {
+        rateView.update(with: CurrencyRateView.Config(
+            initialCurrency: initial,
+            targetCurrency: target,
+            exchangeRate: rate,
+            updateDate: "Курс установлен вручную"))
     }
     
     func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String) {
@@ -78,12 +88,12 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
             updateDate: "updateDate"))
     }
     
-    @objc private func fromTextFieldTapped(textField: UITextField) {
+    @objc private func fromTextFieldTapped(sender: UITapGestureRecognizer) {
         viewModel.fromTextFieldTapped()
 //        showDetailViewController(selectCurrency, sender: self)
     }
     
-    @objc private func toTextFieldTapped(textField: UITextField) {
+    @objc private func toTextFieldTapped(sender: UITapGestureRecognizer) {
         viewModel.toTextFieldTapped()
     }
     
@@ -91,16 +101,22 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         showAlertWithTextField()
     }
     
+    @objc private func refreshButtonTapped() {
+        print("refreshButtonTapped")
+    }
+// TODO: зачем тут self.viewModel
     private func showAlertWithTextField() {
         let alertController = UIAlertController(title: "Установить свой курс", message: nil, preferredStyle: .alert)
         let confirmAction = UIAlertAction(title: "Сохранить", style: .default) { _ in
             if let txtField = alertController.textFields?.first, let text = txtField.text {
+                self.viewModel.setManualCurrencyRate(text)
                 print("Text==>" + text)
             }
         }
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel) { (_) in }
         alertController.addTextField { textField in
             textField.keyboardType = .decimalPad
+            textField.delegate = self
         }
         alertController.addAction(confirmAction)
         alertController.addAction(cancelAction)
@@ -111,9 +127,16 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
     
     private func setupViews() {
         view.backgroundColor = .black
+        navigationController?.navigationBar.tintColor = .white
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .refresh,
+            target: self,
+            action: #selector(refreshButtonTapped))
+        
         rateView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(rateViewTapped(_:))))
         rateView.isUserInteractionEnabled = true
         navigationItem.titleView = rateView
+        
         setupKeyboardStackView()
         setupInputStackView()
     }
@@ -162,7 +185,6 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         inputStackView.axis = .vertical
         inputStackView.distribution = .fill
         
-//        fromLabel.text = "USD"
         fromLabel.textColor = .gray
         fromLabel.font = .systemFont(ofSize: 18)
         fromLabel.textAlignment = .right
@@ -171,20 +193,20 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         }
         inputStackView.addArrangedSubview(fromLabel)
         
-        fromTextField.text = "0"
-        fromTextField.textColor = .white
-        fromTextField.font = .systemFont(ofSize: 65)
-        fromTextField.adjustsFontSizeToFitWidth = true
-        fromTextField.minimumFontSize = 40
-        fromTextField.textAlignment = .right
-        fromTextField.isUserInteractionEnabled = true
-        fromTextField.addTarget(self, action: #selector(fromTextFieldTapped), for: .touchDown)
-        fromTextField.snp.makeConstraints {
+        fromInputLabel.text = "0"
+        fromInputLabel.textColor = .white
+        fromInputLabel.font = .systemFont(ofSize: 65)
+        fromInputLabel.adjustsFontSizeToFitWidth = true
+        fromInputLabel.minimumScaleFactor = 40
+        fromInputLabel.textAlignment = .right
+        fromInputLabel.isUserInteractionEnabled = true
+        fromInputLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(fromTextFieldTapped)))
+        fromInputLabel.tintColor = .clear
+        fromInputLabel.snp.makeConstraints {
             $0.height.equalTo(70)
         }
-        inputStackView.addArrangedSubview(fromTextField)
+        inputStackView.addArrangedSubview(fromInputLabel)
         
-//        toLabel.text = "RUB"
         toLabel.textColor = .gray
         toLabel.font = .systemFont(ofSize: 18)
         toLabel.textAlignment = .right
@@ -193,19 +215,19 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
         }
         inputStackView.addArrangedSubview(toLabel)
         
-// TODO: .touchDown, плохо работает, при долгом нажатии появляется курсор и клавиатура
-        toTextField.text = "0"
-        toTextField.textColor = .white
-        toTextField.font = .systemFont(ofSize: 50)
-        toTextField.adjustsFontSizeToFitWidth = true
-        toTextField.minimumFontSize = 40
-        toTextField.textAlignment = .right
-        toTextField.isUserInteractionEnabled = true
-        toTextField.addTarget(self, action: #selector(toTextFieldTapped), for: .touchDown)
-        toTextField.snp.makeConstraints {
+        toInputLabel.text = "0"
+        toInputLabel.textColor = .white
+        toInputLabel.font = .systemFont(ofSize: 50)
+        toInputLabel.adjustsFontSizeToFitWidth = true
+        toInputLabel.minimumScaleFactor = 40
+        toInputLabel.textAlignment = .right
+        toInputLabel.isUserInteractionEnabled = true
+        toInputLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(toTextFieldTapped)))
+        toInputLabel.tintColor = .clear
+        toInputLabel.snp.makeConstraints {
             $0.height.equalTo(55)
         }
-        inputStackView.addArrangedSubview(toTextField)
+        inputStackView.addArrangedSubview(toInputLabel)
         
         view.addSubview(inputStackView)
         inputStackView.snp.makeConstraints {
@@ -272,5 +294,20 @@ final class MainViewController: UIViewController, MainViewModelDelegate {
             return
         }
         viewModel.buttonTapped(with: value)
+    }
+}
+
+extension MainViewController: UITextFieldDelegate {
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        guard let text = textField.text else {
+            return false
+        }
+        
+        if string.contains(",") && text.contains(",") || string.contains(",") && text.isEmpty {
+            return false
+        }
+        return true
     }
 }

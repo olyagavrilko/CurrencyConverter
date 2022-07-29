@@ -36,6 +36,7 @@ final class CurrencySelectionViewController: UIViewController, CurrencySelection
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "UITableViewCell")
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.backgroundColor = .darkGray
         view.addSubview(tableView)
         tableView.snp.makeConstraints {
             $0.top.equalTo(navBar.snp.bottom)
@@ -50,7 +51,9 @@ extension CurrencySelectionViewController: UITableViewDataSource, UITableViewDel
         let cell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
         content.text = viewModel.currencyArray[indexPath.row]
+        content.textProperties.color = .white
         cell.contentConfiguration = content
+        cell.backgroundColor = .darkGray
         return cell
     }
     
@@ -60,5 +63,6 @@ extension CurrencySelectionViewController: UITableViewDataSource, UITableViewDel
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.currencySelected(indexPath.row)
+        dismiss(animated: true)
     }
 }

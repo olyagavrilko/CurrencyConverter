@@ -39,10 +39,11 @@ enum Action {
 }
 
 protocol MainViewModelDelegate: AnyObject {
-    func update(original: String, converted: String)
+    func updateInput(original: String, converted: String)
     func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String)
     func setNewInitialCurrency(_ selectedCurrency: String, targetCurrency: String)
     func setNewTargetCurrency(initialCurrency: String, _ selectedCurrency: String)
+    func updateRateViewWithManualRate(initial: String, target: String, rate: Double)
 }
 
 final class MainViewModel {
@@ -52,17 +53,7 @@ final class MainViewModel {
     var exchangeRate = 5.0
     var initialCurrency = "USD"
     var targetCurrency = "RUB"
-    var currentState: State = .initial //{
-//        didSet {
-//            do {
-//                let original = try makeOutputText(using: currentState)
-//                let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
-//                view?.update(original: original, converted: converted)
-//            } catch {
-//                view?.update(original: AppConsts.error, converted: AppConsts.error)
-//            }
-//        }
-//    }
+    var currentState: State = .initial
     
     let router: MainRouter
     
@@ -151,22 +142,30 @@ final class MainViewModel {
     }
     
     func setNewInitialCurrency(selectedCurrency: String) {
-        initialCurrency = selectedCurrency
-        delegate?.setNewInitialCurrency(selectedCurrency, targetCurrency: targetCurrency)
+        if selectedCurrency == targetCurrency {
+            switchCurrency()
+        } else {
+            initialCurrency = selectedCurrency
+            delegate?.setNewInitialCurrency(selectedCurrency, targetCurrency: targetCurrency)
+        }
     }
     
     func setNewTargetCurrency(selectedCurrency: String) {
-        targetCurrency = selectedCurrency
-        delegate?.setNewTargetCurrency(initialCurrency: initialCurrency, selectedCurrency)
+        if selectedCurrency == initialCurrency {
+            switchCurrency()
+        } else {
+            targetCurrency = selectedCurrency
+            delegate?.setNewTargetCurrency(initialCurrency: initialCurrency, selectedCurrency)
+        }
     }
     
     func updateInputs() {
         do {
             let original = try makeOutputText(using: currentState)
             let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
-            delegate?.update(original: original, converted: converted)
+            delegate?.updateInput(original: original, converted: converted)
         } catch {
-            delegate?.update(original: AppConsts.error, converted: AppConsts.error)
+            delegate?.updateInput(original: AppConsts.error, converted: AppConsts.error)
         }
     }
     
@@ -180,5 +179,19 @@ final class MainViewModel {
         router.openCurrencySelection { selectedCurrency in
             self.setNewTargetCurrency(selectedCurrency: selectedCurrency)
         }
+    }
+    
+    func setManualCurrencyRate(_ manualRate: String) {
+        
+        guard let rate = try? Formatter.formatToDouble(manualRate) else {
+            return
+        }
+        
+        exchangeRate = rate
+        
+        delegate?.updateRateViewWithManualRate(
+            initial: initialCurrency,
+            target: targetCurrency,
+            rate: rate)
     }
 }
