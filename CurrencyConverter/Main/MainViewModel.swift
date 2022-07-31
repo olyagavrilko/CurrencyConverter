@@ -56,9 +56,11 @@ final class MainViewModel {
     var currentState: State = .initial
     
     let router: MainRouter
+    let networkService: NetworkService
     
-    init(router: MainRouter) {
+    init(router: MainRouter, networkService: NetworkService) {
         self.router = router
+        self.networkService = networkService
     }
     
     func makeOutputText(using state: State) throws -> String {
@@ -132,13 +134,20 @@ final class MainViewModel {
         initialCurrency = targetCurrency
         targetCurrency = tmp
         
-        exchangeRate = 1 / exchangeRate
+//        exchangeRate = 1 / exchangeRate
         
-        delegate?.switchCurrencyPair(
-            initial: initialCurrency,
-            target: targetCurrency,
-            rate: exchangeRate,
-            updateDate: "String")
+        networkService.fetchCurrencyRate(initial: initialCurrency, target: targetCurrency) { [weak self] date, rate in
+            
+            guard let self = self else {
+                return
+            }
+            
+            self.delegate?.switchCurrencyPair(
+                initial: self.initialCurrency,
+                target: self.targetCurrency,
+                rate: rate,
+                updateDate: date)
+        }
     }
     
     func setNewInitialCurrency(selectedCurrency: String) {
