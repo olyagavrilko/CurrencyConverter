@@ -22,6 +22,8 @@ final class MainViewController: UIViewController {
     private let initialInputView = InputView(size: .normal)
     private let targetInputView = InputView(size: .small)
     private let keyboardView = KeyboardView()
+    
+    private let refreshButton = UIButton()
         
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
@@ -87,12 +89,15 @@ extension MainViewController: UITextFieldDelegate {
 extension MainViewController {
     
     private func setupViews() {
+        refreshButton.setImage(UIImage(named: "refresh"), for: .normal)
+        refreshButton.addTarget(self, action: #selector(refreshButtonTapped), for: .touchUpInside)
+        
+        let leftBarButton = UIBarButtonItem()
+        leftBarButton.customView = refreshButton
+        
         view.backgroundColor = .black
         navigationController?.navigationBar.tintColor = .white
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .refresh,
-            target: self,
-            action: #selector(refreshButtonTapped))
+        navigationItem.leftBarButtonItem = leftBarButton
         navigationItem.titleView = rateView
         
         let stackView = UIStackView()
@@ -110,20 +115,25 @@ extension MainViewController {
     }
     
     @objc private func refreshButtonTapped() {
+        startLoader()
         viewModel.refreshButtonTapped()
     }
+    
+    private func startLoader() {
+        CATransaction.begin()
+        CATransaction.setCompletionBlock {
+            if self.viewModel.isLoading {
+                self.startLoader()
+            }
+        }
+        let angle = CGFloat.pi * 2
+        let spin = CABasicAnimation(keyPath: #keyPath(CALayer.transform))
+        spin.duration = 1
+        spin.valueFunction = CAValueFunction(name: .rotateZ) // 1
+        spin.fromValue = 0 // 2
+        spin.toValue = angle
+        refreshButton.layer.add(spin, forKey: "spinAnimation")
+        CATransaction.setDisableActions(true)
+        CATransaction.commit()
+    }
 }
-
-//    @objc private func fromTextFieldTapped(sender: UITapGestureRecognizer) {
-//        viewModel.fromTextFieldTapped()
-////        showDetailViewController(selectCurrency, sender: self)
-//    }
-//
-//    @objc private func toTextFieldTapped(sender: UITapGestureRecognizer) {
-//        viewModel.toTextFieldTapped()
-//    }
-//
-//    @objc private func rateViewTapped(_ sender: UITapGestureRecognizer? = nil) {
-//        showAlertWithTextField()
-//    }
-//
