@@ -9,33 +9,42 @@ import Foundation
 
 final class NetworkService {
     
-    func fetchCurrencyRate(initial: String, target: String, completion: @escaping (String, Double) -> Void) {
+    enum Failure: Error {
+        case `default`
+    }
+    
+    func fetchCurrencyRate(initial: String, target: String, completion: @escaping (Result<CurrencyRate, Failure>) -> Void) {
         
         let initialLow = initial.lowercased()
         let targetLow = target.lowercased()
         
         guard let url = URL(string: "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/\(initialLow)/\(targetLow).json")
         else {
+            completion(.failure(.default))
             return
         }
         
         let request = URLRequest(url: url)
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data else {
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data, options: []),
+                  let dict = json as? [String: Any],
+                  let value = dict[targetLow] as? Double,
+                  let date = dict["date"] as? String
+            else {
+                DispatchQueue.main.async {
+                    completion(.failure(.default))
+                }
                 return
             }
             
-            let json = try! JSONSerialization.jsonObject(with: data, options: [])
-            let dict = json as! [String: Any]
-            let date = dict["date"] as! String
-            let value = dict[targetLow] as! Double
+            let currencyRate = CurrencyRate(value: value, date: date)
             
             DispatchQueue.main.async {
-                completion(date, value)
+                completion(.success(currencyRate))
             }
-        }
-        
-        task.resume()
+        }.resume()
     }
 }

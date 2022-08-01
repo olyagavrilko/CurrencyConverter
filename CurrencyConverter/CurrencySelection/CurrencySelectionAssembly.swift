@@ -11,9 +11,6 @@ final class CurrencySelectionAssembly {
     
     func assemble(completion: @escaping (String) -> Void) -> CurrencySelectionViewController {
         let viewModel = CurrencySelectionViewModel(completion: completion)
-        let viewController = CurrencySelectionViewController(viewModel: viewModel)
-        
-        viewModel.delegate = viewController
-        return viewController
+        return CurrencySelectionViewController(viewModel: viewModel)
     }
 }

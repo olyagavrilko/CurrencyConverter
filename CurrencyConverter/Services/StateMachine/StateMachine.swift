@@ -277,7 +277,7 @@ enum StateMachine {
                     previousOperand: previousOperand,
                     previousOperation: previousOperation)
             case .cancel:
-                return State.initial
+                return .initial
             }
             
         case .error:

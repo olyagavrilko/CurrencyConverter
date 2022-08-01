@@ -7,7 +7,7 @@
 
 import Foundation
 
-//struct CurrencyRate: Decodable {
-//    let date: String
-//    let 
-//}
+struct CurrencyRate {
+    let value: Double
+    let date: String
+}

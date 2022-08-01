@@ -7,60 +7,74 @@
 
 import Foundation
 
-enum Operation: String {
-    case add = "􀅼"
-    case subtract = "􀅽"
-    case multiply = "􀅾"
-    case divide = "􀅿"
-    
-    var isPrimary: Bool {
-        self == .multiply || self == .divide
-    }
-}
-
-enum State: Equatable {
-    case initial
-    case firstInput(String)
-    case operation(String, Operation)
-    case secondInput(first: String, second: String, Operation)
-    case secondOperation(first: String, second: String, firstOperation: Operation, secondOperation: Operation)
-    case thirdInput(first: String, second: String, third: String, firstOperation: Operation, secondOperation: Operation)
-    case finish(String, previousOperand: String, previousOperation: Operation)
-    case error
-}
-
-enum Action {
-    case number(String)
-    case operation(Operation)
-    case comma
-    case percent
-    case equal
-    case cancel
-}
-
 protocol MainViewModelDelegate: AnyObject {
-    func updateInput(original: String, converted: String)
-    func switchCurrencyPair(initial: String, target: String, rate: Double, updateDate: String)
-    func setNewInitialCurrency(_ selectedCurrency: String, targetCurrency: String)
-    func setNewTargetCurrency(initialCurrency: String, _ selectedCurrency: String)
-    func updateRateViewWithManualRate(initial: String, target: String, rate: Double)
+    func updateView(with config: MainViewController.Config)
+    func showAlertToSetRateManually()
 }
 
 final class MainViewModel {
     
     weak var delegate: MainViewModelDelegate?
     
-    var exchangeRate = 5.0
-    var initialCurrency = "USD"
-    var targetCurrency = "RUB"
-    var currentState: State = .initial
+    private let router: MainRouter
+    private let networkService: NetworkService
+    private let storage: Storage
     
-    let router: MainRouter
-    let networkService: NetworkService
+    private var exchangeRate: Double = 1 {
+        didSet { storage.exchangeRate = exchangeRate }
+    }
+    private var lastUpdateDate: String? {
+        didSet { storage.lastUpdateDate = lastUpdateDate }
+    }
+    private var rateSetManually = false {
+        didSet { storage.rateSetManually = rateSetManually }
+    }
+    private var initialCurrency = "" {
+        didSet { storage.initialCurrency = initialCurrency }
+    }
+    private var targetCurrency = "" {
+        didSet { storage.targetCurrency = targetCurrency }
+    }
+    private var currentState: State = .initial
     
-    init(router: MainRouter, networkService: NetworkService) {
+    init(router: MainRouter, networkService: NetworkService, storage: Storage) {
         self.router = router
         self.networkService = networkService
+        self.storage = storage
+    }
+    
+    func viewDidLoad() {
+        lastUpdateDate = storage.lastUpdateDate
+        rateSetManually = storage.rateSetManually
+        initialCurrency = storage.initialCurrency
+        targetCurrency = storage.targetCurrency
+        
+        if let exchangeRate = storage.exchangeRate {
+            self.exchangeRate = exchangeRate
+            updateView()
+            if !rateSetManually {
+                fetchCurrencyRateAndUpdateView()
+            }
+        } else {
+            rateSetManually = true
+            updateView()
+            fetchCurrencyRateAndUpdateView()
+        }
+    }
+    
+    func saveRateButtonTapped(_ manualRate: String) {
+        
+        guard let rate = try? Formatter.formatToDouble(manualRate) else {
+            return
+        }
+        
+        exchangeRate = rate
+        rateSetManually = true
+        updateView()
+    }
+    
+    func refreshButtonTapped() {
+        fetchCurrencyRateAndUpdateView()
     }
     
     func makeOutputText(using state: State) throws -> String {
@@ -83,28 +97,38 @@ final class MainViewModel {
             return AppConsts.error
         }
     }
+}
+
+// MARK: - Private
+
+extension MainViewModel {
     
-    func convert(unconverted: String, exchangeRate: Double) throws -> String {
+    private func fetchCurrencyRateAndUpdateView() {
+        networkService.fetchCurrencyRate(initial: initialCurrency, target: targetCurrency) { [weak self] result in
+            
+            guard let self = self else {
+                return
+            }
+            
+            switch result {
+            case .success(let rate):
+                self.lastUpdateDate = rate.date
+                self.exchangeRate = rate.value
+                self.rateSetManually = false
+                self.updateView()
+            case .failure:
+                self.updateView()
+            }
+        }
+    }
+    
+    private func convert(unconverted: String, exchangeRate: Double) throws -> String {
         let number = try Formatter.formatToDouble(unconverted)
         let result = try Formatter.formatToString(number * exchangeRate)
         return try Formatter.formatToDecimalStyle(result)
     }
     
-    func buttonTapped(with value: String) {
-        if value == "􀄬" {
-            switchCurrency()
-        } else {
-            let action = makeAction(using: value)
-            do {
-                currentState = try StateMachine.reduce(state: currentState, action: action)
-            } catch {
-                currentState = State.error
-            }
-        }
-        updateInputs()
-    }
-    
-    func makeAction(using value: String) -> Action {
+    private func makeAction(using value: String) -> Action {
         if "0123456789".contains(value) {
             return Action.number(value)
         } else if "􀅿􀅾􀅼􀅽".contains(value) {
@@ -129,78 +153,137 @@ final class MainViewModel {
         return Action.cancel
     }
     
-    func switchCurrency() {
+    private func makeViewConfig() -> MainViewController.Config {
+        var initialInput: String
+        var targetInput: String
+        
+        do {
+            initialInput = try makeOutputText(using: currentState)
+            targetInput = try convert(unconverted: initialInput, exchangeRate: exchangeRate)
+        } catch {
+            initialInput = AppConsts.error
+            targetInput = AppConsts.error
+        }
+        
+        return MainViewController.Config(
+            rateViewConfig: CurrencyRateView.Config(
+                initialCurrency: initialCurrency,
+                targetCurrency: targetCurrency,
+                exchangeRate: exchangeRate,
+                title: rateSetManually ? "Курс установлен вручную" : lastUpdateDate ?? "",
+                action: rateViewTapped),
+            initialInputViewConfig: InputView.Config(
+                currency: initialCurrency,
+                input: initialInput,
+                tapAction: initialInputTapped),
+            targetInputViewConfig: InputView.Config(
+                currency: targetCurrency,
+                input: targetInput,
+                tapAction: targetInputTapped),
+            keyboardViewConfig: KeyboardView.Config(
+                action: keyboardButtonTapped))
+    }
+    
+    private func updateView() {
+        delegate?.updateView(with: makeViewConfig())
+    }
+    
+    private func keyboardButtonTapped(_ title: String) {
+        if title == "􀄬" {
+            switchCurrency()
+            fetchCurrencyRateAndUpdateView()
+        } else {
+            let action = makeAction(using: title)
+            do {
+                currentState = try StateMachine.reduce(state: currentState, action: action)
+            } catch {
+                currentState = State.error
+            }
+            updateView()
+        }
+    }
+    
+    private func switchCurrency() {
         let tmp = initialCurrency
         initialCurrency = targetCurrency
         targetCurrency = tmp
-        
-//        exchangeRate = 1 / exchangeRate
-        
-        networkService.fetchCurrencyRate(initial: initialCurrency, target: targetCurrency) { [weak self] date, rate in
-            
-            guard let self = self else {
-                return
+    }
+    
+    private func rateViewTapped() {
+        delegate?.showAlertToSetRateManually()
+    }
+    
+    private func initialInputTapped() {
+        router.openCurrencySelection { selectedCurrency in
+            if self.targetCurrency == selectedCurrency {
+                self.switchCurrency()
+            } else {
+                self.initialCurrency = selectedCurrency
             }
-            
-            self.delegate?.switchCurrencyPair(
-                initial: self.initialCurrency,
-                target: self.targetCurrency,
-                rate: rate,
-                updateDate: date)
+            self.fetchCurrencyRateAndUpdateView()
         }
     }
     
-    func setNewInitialCurrency(selectedCurrency: String) {
-        if selectedCurrency == targetCurrency {
-            switchCurrency()
-        } else {
-            initialCurrency = selectedCurrency
-            delegate?.setNewInitialCurrency(selectedCurrency, targetCurrency: targetCurrency)
-        }
-    }
-    
-    func setNewTargetCurrency(selectedCurrency: String) {
-        if selectedCurrency == initialCurrency {
-            switchCurrency()
-        } else {
-            targetCurrency = selectedCurrency
-            delegate?.setNewTargetCurrency(initialCurrency: initialCurrency, selectedCurrency)
-        }
-    }
-    
-    func updateInputs() {
-        do {
-            let original = try makeOutputText(using: currentState)
-            let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
-            delegate?.updateInput(original: original, converted: converted)
-        } catch {
-            delegate?.updateInput(original: AppConsts.error, converted: AppConsts.error)
-        }
-    }
-    
-    func fromTextFieldTapped() {
+    private func targetInputTapped() {
         router.openCurrencySelection { selectedCurrency in
-            self.setNewInitialCurrency(selectedCurrency: selectedCurrency)
+            if self.initialCurrency == selectedCurrency {
+                self.switchCurrency()
+            } else {
+                self.targetCurrency = selectedCurrency
+            }
+            self.fetchCurrencyRateAndUpdateView()
         }
-    }
-    
-    func toTextFieldTapped() {
-        router.openCurrencySelection { selectedCurrency in
-            self.setNewTargetCurrency(selectedCurrency: selectedCurrency)
-        }
-    }
-    
-    func setManualCurrencyRate(_ manualRate: String) {
-        
-        guard let rate = try? Formatter.formatToDouble(manualRate) else {
-            return
-        }
-        
-        exchangeRate = rate
-        
-        delegate?.updateRateViewWithManualRate(
-            initial: initialCurrency,
-            target: targetCurrency,
-            rate: rate)
     }
 }
+
+//    func buttonTapped(with value: String) {
+//        if value == "􀄬" {
+//            switchCurrency()
+//        } else {
+//            let action = makeAction(using: value)
+//            do {
+//                currentState = try StateMachine.reduce(state: currentState, action: action)
+//            } catch {
+//                currentState = State.error
+//            }
+//        }
+//        updateInputs()
+//    }
+//    func setNewInitialCurrency(selectedCurrency: String) {
+//        if selectedCurrency == targetCurrency {
+//            switchCurrency()
+//        } else {
+//            initialCurrency = selectedCurrency
+//            delegate?.setNewInitialCurrency(selectedCurrency, targetCurrency: targetCurrency)
+//        }
+//    }
+//
+//    func setNewTargetCurrency(selectedCurrency: String) {
+//        if selectedCurrency == initialCurrency {
+//            switchCurrency()
+//        } else {
+//            targetCurrency = selectedCurrency
+//            delegate?.setNewTargetCurrency(initialCurrency: initialCurrency, selectedCurrency)
+//        }
+//    }
+//func updateInputs() {
+//        do {
+//            let original = try makeOutputText(using: currentState)
+//            let converted = try convert(unconverted: original, exchangeRate: exchangeRate)
+//            delegate?.updateInput(original: original, converted: converted)
+//        } catch {
+//            delegate?.updateInput(original: AppConsts.error, converted: AppConsts.error)
+//        }
+//    }
+//
+//    func fromTextFieldTapped() {
+//        router.openCurrencySelection { selectedCurrency in
+//            self.setNewInitialCurrency(selectedCurrency: selectedCurrency)
+//        }
+//    }
+//
+//    func toTextFieldTapped() {
+//        router.openCurrencySelection { selectedCurrency in
+//            self.setNewTargetCurrency(selectedCurrency: selectedCurrency)
+//        }
+//    }

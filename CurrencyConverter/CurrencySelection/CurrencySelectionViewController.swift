@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CurrencySelectionViewController: UIViewController, CurrencySelectionViewModelDelegate {
+final class CurrencySelectionViewController: UIViewController {
     
     private let tableView = UITableView()
     private let navBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
@@ -29,9 +29,6 @@ final class CurrencySelectionViewController: UIViewController, CurrencySelection
         navBar.barTintColor = .white
         navBar.setItems([navItem], animated: false)
         view.addSubview(navBar)
-        navBar.snp.makeConstraints {
-            $0.trailing.leading.top.equalToSuperview()
-        }
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "UITableViewCell")
         tableView.delegate = self
@@ -50,7 +47,8 @@ extension CurrencySelectionViewController: UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
-        content.text = viewModel.currencyArray[indexPath.row]
+        content.text = viewModel.currencies[indexPath.row].code
+        content.secondaryText = viewModel.currencies[indexPath.row].description
         content.textProperties.color = .white
         cell.contentConfiguration = content
         cell.backgroundColor = .darkGray
@@ -58,7 +56,7 @@ extension CurrencySelectionViewController: UITableViewDataSource, UITableViewDel
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.currencyArray.count
+        viewModel.currencies.count
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

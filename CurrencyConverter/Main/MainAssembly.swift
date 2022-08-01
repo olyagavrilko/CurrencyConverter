@@ -12,7 +12,8 @@ final class MainAssembly {
     func assemble() -> MainViewController {
         let router = MainRouter()
         let networkService = NetworkService()
-        let viewModel = MainViewModel(router: router, networkService: networkService)
+        let storage = Storage()
+        let viewModel = MainViewModel(router: router, networkService: networkService, storage: storage)
         let viewController = MainViewController(viewModel: viewModel)
         
         router.viewController = viewController

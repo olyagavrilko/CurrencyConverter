@@ -7,22 +7,32 @@
 
 import Foundation
 
-protocol CurrencySelectionViewModelDelegate: AnyObject {
-    
-}
-
 final class CurrencySelectionViewModel {
     
-    let currencyArray = ["RUB", "USD", "EUR"]
+    typealias Currency = (code: String, description: String)
     
-    weak var delegate: CurrencySelectionViewModelDelegate?
-    let completion: (String) -> Void
+    var currencies: [Currency] = []
+    
+    private let completion: (String) -> Void
     
     init(completion: @escaping (String) -> Void) {
         self.completion = completion
+        self.currencies = self.fetchCurrenciesFromFile()
     }
     
-    func currencySelected(_ currency: Int) {
-        completion(currencyArray[currency])
+    func currencySelected(_ index: Int) {
+        completion(currencies[index].code)
+    }
+    
+    private func fetchCurrenciesFromFile() -> [Currency] {
+        
+        guard let filepath = Bundle.main.path(forResource: "currencies", ofType: "json"),
+              let string = try? String(contentsOfFile: filepath),
+              let data = string.data(using: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String]
+        else {
+            return []
+        }
+        return dict.map { (code: $0.key, description: $0.value) }
     }
 }
